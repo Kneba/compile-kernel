@@ -13,7 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup env
-        run: pacman -Syu --needed --noconfirm wget base-devel xmlto inetutils bc cpio python-sphinx python-sphinx_rtd_theme graphviz imagemagick git python2 python zip 
+        run: pacman -Syu --needed --noconfirm wget base-devel xmlto inetutils bc cpio python-sphinx python-sphinx_rtd_theme graphviz imagemagick git python2 python zip
+          git config --global user.name "Kneba"
+          git config --global user.email "abenkenary3@gmail.com"
       - name: Build Kernel
         env:
           TOKEN: ${{ secrets.TOKEN }}
