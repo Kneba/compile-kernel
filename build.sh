@@ -81,12 +81,12 @@ make -j$(nproc) ARCH=arm64 O=out \
 	finerr
 	exit 1
    fi
-  git clone --depth=1 $ANYKERNEL -b main AnyKernel
-	cp $IMAGE AnyKernel
+  git clone --depth=1 $ANYKERNEL -b tom AnyKernel3
+	cp $IMAGE AnyKernel3
 }
 # Push kernel to channel
 function push() {
-    cd AnyKernel
+    cd AnyKernel3
     ZIP=$(echo *.zip)
     curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
@@ -106,8 +106,8 @@ function finerr() {
 
 # Zipping
 function zipping() {
-    cd AnyKernel || exit 1
-    zip -r9 [LV][$KERNELNAME]-$DEVICE_CODENAME-HMP-4.4.292-$DATE.zip *
+    cd AnyKernel3 || exit 1
+    zip -r9 [NLV][$KERNELNAME]-HMP-CAF-4.4.205-$DATE.zip *
     cd ..
 }
 compile
