@@ -13,7 +13,7 @@ GCCbPath="${MainPath}/GCC32"
 MainZipGCCaPath="${MainPath}/GCC64-zip"
 MainZipGCCbPath="${MainPath}/GCC32-zip"
 
-git clone https://$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b hmp $DEVICE_CODENAME
+git clone https://$TOKEN@github.com/Kneba/android_kernel_asus_sdm660 -b cat $DEVICE_CODENAME
 
 ClangPath=${MainClangZipPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
@@ -32,7 +32,7 @@ tar -xf gcc32.tar.gz -C $GCCbPath
 # Prepare 1
 KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
 export LD="ld.lld"
-export KERNELNAME=perf
+export KERNELNAME=TOM
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
@@ -107,7 +107,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel3 || exit 1
-    zip -r9 [NLV][$KERNELNAME]-HMP-CAF-4.4.205-$DATE.zip *
+    zip -r9 [NLV][$KERNELNAME]-HMP-4.4.302-$DATE.zip *
     cd ..
 }
 compile
