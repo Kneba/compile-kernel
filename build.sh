@@ -56,8 +56,8 @@ mkdir $GCCaPath
 mkdir $GCCbPath
 
 msg "|| Cloning GCC toolchain ||"
-git clone --depth=1 https://github.com/Tiktodz/aarch64-linux-android-4.9 $GCCaPath
-git clone --depth=1 https://github.com/Tiktodz/arm-linux-androideabi-4.9 $GCCbPath
+git clone --depth=1 https://github.com/Kneba/aarch64-linux-android-4.9 $GCCaPath
+git clone --depth=1 https://github.com/Kneba/arm-linux-androideabi-4.9 $GCCbPath
 
 # Prepared
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
