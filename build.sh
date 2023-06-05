@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2022 Kneba <abenkenary3@gmail.com>
+# Copyright (C) 2023 Kneba <abenkenary3@gmail.com>
 #
 
+#
 # Function to show an informational message
+#
+
 msg() {
 	echo
     echo -e "\e[1;32m$*\e[0m"
@@ -22,51 +25,49 @@ cdir() {
 # Main
 MainPath="$(pwd)"
 MainClangPath="${MainPath}/clang"
-MainClangZipPath="${MainPath}/clang-zip"
-ClangPath="${MainClangZipPath}"
-GCCaPath="${MainPath}/GCC64"
-GCCbPath="${MainPath}/GCC32"
-MainZipGCCaPath="${MainPath}/GCC64-zip"
-MainZipGCCbPath="${MainPath}/GCC32-zip"
+ClangPath="${MainClangPath}"
+MainGCCaPath="${MainPath}/GCC64"
+MainGCCbPath="${MainPath}/GCC32"
+GCCaPath="${MainGCCaPath}"
+GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=13
+VERSION=9x13
 KERNELNAME=TheOneMemory
-CODENAME=Hayzel
+CODENAME=Onyx
 VARIANT=HMP
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 $DEVICE_CODENAME
+git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/Ruega-Kernel-X00T -b 9x13 kernel
 
-# Clone AOSP Clang
-ClangPath=${MainClangZipPath}
+# Clone Snapdragon Clang
+ClangPath=${MainClangPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
 mkdir $ClangPath
 rm -rf $ClangPath/*
-git clone --depth=1 https://github.com/RyuujiX/SDClang $ClangPath
+msg "|| Cloning sdclang toolchain ||"
+git clone --depth=1 https://github.com/RyuujiX/SDClang -b 14 $ClangPath
 
 # Clone GCC
 mkdir $GCCaPath
 mkdir $GCCbPath
-wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-12.1.0_r16.tar.gz -O "gcc64.tar.gz"
-tar -xf gcc64.tar.gz -C $GCCaPath
-wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-12.1.0_r16.tar.gz -O "gcc32.tar.gz"
-tar -xf gcc32.tar.gz -C $GCCbPath
 
-# Prepare
-KERNEL_ROOTDIR=$(pwd)/$DEVICE_CODENAME # IMPORTANT ! Fill with your kernel source root directory.
-export LD=ld.lld
-export LLVM=1
-export LLVM_IAS=1
+msg "|| Cloning GCC toolchain ||"
+git clone --depth=1 https://github.com/Tiktodz/aarch64-linux-android-4.9 $GCCaPath
+git clone --depth=1 https://github.com/Tiktodz/arm-linux-androideabi-4.9 $GCCbPath
+
+# Prepared
+KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
-IMAGE=$(pwd)/$DEVICE_CODENAME/out/arch/arm64/boot/Image.gz-dtb
-CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
-DATE=$(date +"%F-%S")
+IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
+CLANG_VER="Snapdragon clang version 14.1.5"
+#LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
+export KBUILD_COMPILER_STRING="$CLANG_VER X GCC 4.9"
+ClangMoreStrings="AR=llvm-ar NM=llvm-nm AS=llvm-as STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf HOSTAR=llvm-ar HOSTAS=llvm-as LD_LIBRARY_PATH=$ClangPath/lib LD=ld.lld HOSTLD=ld.lld"
+DATE=$(date +"%Y-%m-%d")
 START=$(date +"%s")
 
 # Java
@@ -82,36 +83,29 @@ tg_post_msg() {
     -d "parse_mode=html" \
     -d text="$1"
 }
-# Compile
+# Compiler
 compile(){
 cd ${KERNEL_ROOTDIR}
+msg "|| Cooking kernel. . . ||"
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 $KERNEL_DEFCONFIG
-make -j$(nproc) ARCH=arm64 O=out \
-    LD_LIBRARY_PATH="${ClangPath}/lib64:${LD_LIBRARY_PATH}" \
+make -j$(nproc) O=out ARCH=arm64 X00TD_defconfig
+make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     PATH=$ClangPath/bin:$GCCaPath/bin:$GCCbPath/bin:/usr/bin:${PATH} \
-    CC=${ClangPath}/bin/clang \
-    NM=${ClangPath}/bin/llvm-nm \
-    CXX=${ClangPath}/bin/clang++ \
-    AR=${ClangPath}/bin/llvm-ar \
-    STRIP=${ClangPath}/bin/llvm-strip \
-    OBJCOPY=${ClangPath}/bin/llvm-objcopy \
-    OBJDUMP=${ClangPath}/bin/llvm-objdump \
-    OBJSIZE=${ClangPath}/bin/llvm-size \
-    READELF=${ClangPath}/bin/llvm-readelf \
+    CC=clang \
     CROSS_COMPILE=aarch64-linux-android- \
     CROSS_COMPILE_ARM32=arm-linux-androideabi- \
     CLANG_TRIPLE=aarch64-linux-gnu- \
-    HOSTAR=${ClangPath}/bin/llvm-ar \
-    HOSTCC=${ClangPath}/bin/clang \
-    HOSTCXX=${ClangPath}/bin/clang++
+    HOSTCC=gcc \
+    HOSTCXX=g++ ${ClangMoreStrings}
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
 	exit 1
    fi
-   git clone $ANYKERNEL -b eas-compile AnyKernel
+
+   msg "|| Cloning AnyKernel ||"
+   git clone --depth=1 https://github.com/strongreasons/AnyKernel3 -b hmp-12 AnyKernel
 	cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
@@ -128,7 +122,7 @@ function push() {
         -<code>$DATE</code>
 
         <b>🐧 Linux Version: </b>
-        -<code>4.4.205</code>
+        -<code>4.4.302</code>
 
          <b>💿 Compiler: </b>
         -<code>$KBUILD_COMPILER_STRING</code>
@@ -139,7 +133,7 @@ function push() {
         <b>🆑 Changelog: </b>
         - <code>$COMMIT_HEAD</code>
         <b></b>
-        #ElectroWizard #CAF #EAS"
+        #TheOneMemory #$CODENAME #$VARIANT"
 }
 # Find Error
 function finerr() {
@@ -153,15 +147,15 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [$VERSION]$KERNELNAME-$CODENAME-$VARIANT-"$DATE" . -x ".git*" -x "README.md" -x "*.zip"
+    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" . -x ".git*" -x "README.md" -x "zipsigner*" "*.zip"
 
-    ZIP_FINAL="[$VERSION]$KERNELNAME-$CODENAME-$VARIANT-$DATE"
+    ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
 
     msg "|| Signing Zip ||"
     tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
 
-    curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
-    java -jar zipsigner-3.0.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
+    curl -sLo zipsigner-4.0.jar https://raw.githubusercontent.com/baalajimaestro/AnyKernel3/master/zipsigner-4.0.jar
+    java -jar zipsigner-4.0.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
     ZIP_FINAL="$ZIP_FINAL-signed"
     cd ..
 }
