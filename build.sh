@@ -26,10 +26,6 @@ cdir() {
 MainPath="$(pwd)"
 MainClangPath="${MainPath}/clang"
 ClangPath="${MainClangPath}"
-MainGCCaPath="${MainPath}/GCC64"
-MainGCCbPath="${MainPath}/GCC32"
-GCCaPath="${MainGCCaPath}"
-GCCbPath="${MainGCCbPath}"
 
 # Identity
 VERSION=9x13
@@ -43,30 +39,21 @@ MANUFACTURERINFO="ASUSTek Computer Inc."
 # Clone Kernel Source
 git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/Ruega-Kernel-X00T -b 9x13 kernel
 
-# Clone Snapdragon Clang
+# Clone StRess Clang
 ClangPath=${MainClangPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
 mkdir $ClangPath
 rm -rf $ClangPath/*
-msg "|| Cloning sdclang toolchain ||"
-git clone --depth=1 https://github.com/RyuujiX/SDClang -b 14 $ClangPath
-
-# Clone GCC
-mkdir $GCCaPath
-mkdir $GCCbPath
-
-msg "|| Cloning GCC toolchain ||"
-git clone --depth=1 https://github.com/Kneba/aarch64-linux-android-4.9 $GCCaPath
-git clone --depth=1 https://github.com/Kneba/arm-linux-androideabi-4.9 $GCCbPath
+msg "|| Cloning StRess clang 16 ||"
+git clone --depth=1 https://gitlab.com/strongreasons/stress-clang.git $ClangPath
 
 # Prepared
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
-CLANG_VER="Snapdragon clang version 14.1.5"
-#LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER X GCC 4.9"
-ClangMoreStrings="AR=llvm-ar NM=llvm-nm AS=llvm-as STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf HOSTAR=llvm-ar HOSTAS=llvm-as LD_LIBRARY_PATH=$ClangPath/lib LD=ld.lld HOSTLD=ld.lld"
+CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
+export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
 DATE=$(date +"%Y-%m-%d")
 START=$(date +"%s")
 
@@ -91,13 +78,21 @@ export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
 make -j$(nproc) O=out ARCH=arm64 X00TD_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
-    PATH=$ClangPath/bin:$GCCaPath/bin:$GCCbPath/bin:/usr/bin:${PATH} \
+    LD_LIBRARY_PATH="${ClangPath}/lib64:${LD_LIBRARY_PATH}" \
+    PATH=$ClangPath/bin:${PATH} \
+    CROSS_COMPILE=aarch64-linux-gnu- \
+    CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
     CC=clang \
-    CROSS_COMPILE=aarch64-linux-android- \
-    CROSS_COMPILE_ARM32=arm-linux-androideabi- \
-    CLANG_TRIPLE=aarch64-linux-gnu- \
-    HOSTCC=gcc \
-    HOSTCXX=g++ ${ClangMoreStrings}
+    AR=llvm-ar \
+    OBJDUMP=llvm-objdump \
+    STRIP=llvm-strip \
+    NM=llvm-nm \
+    OBJCOPY=llvm-objcopy \
+    READELF=llvm-readelf \
+    HOSTAR=llvm-ar \
+    HOSTAS=llvm-as \
+    HOSTLD=ld.lld \
+    LD="ld.lld"
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
