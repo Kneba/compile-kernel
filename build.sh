@@ -5,7 +5,7 @@
 
 #
 # Function to show an informational message
-#
+##
 
 msg() {
 	echo
@@ -30,14 +30,14 @@ ClangPath="${MainClangPath}"
 # Identity
 VERSION=9x13
 KERNELNAME=TheOneMemory
-CODENAME=Onyx
+CODENAME=Hayzel
 VARIANT=HMP
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/Ruega-Kernel-X00T -b 9x13 kernel
+git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/Ruega-Kernel-X00T -b hayzel kernel
 
 # Clone StRess Clang
 ClangPath=${MainClangPath}
