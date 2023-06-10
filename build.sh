@@ -30,14 +30,14 @@ ClangPath="${MainClangPath}"
 # Identity
 VERSION=9x13
 KERNELNAME=TheOneMemory
-CODENAME=Hayzel
-VARIANT=HMP
+CODENAME=Onyx
+VARIANT=EAS
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/Ruega-Kernel-X00T -b hayzel kernel
+git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660-1 -b caf kernel
 
 # Clone StRess Clang
 ClangPath=${MainClangPath}
@@ -45,7 +45,7 @@ ClangPath=${MainClangPath}
 mkdir $ClangPath
 rm -rf $ClangPath/*
 msg "|| Cloning StRess clang 16 ||"
-git clone --depth=1 https://gitlab.com/strongreasons/stress-clang.git $ClangPath
+git clone --depth=1 https://github.com/kdrag0n/proton-clang.git $ClangPath
 
 # Prepared
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
@@ -87,12 +87,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     OBJDUMP=llvm-objdump \
     STRIP=llvm-strip \
     NM=llvm-nm \
-    OBJCOPY=llvm-objcopy \
-    READELF=llvm-readelf \
-    HOSTAR=llvm-ar \
-    HOSTAS=llvm-as \
-    HOSTLD=ld.lld \
-    LD="ld.lld"
+    OBJCOPY=llvm-objcopy
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
@@ -100,7 +95,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone --depth=1 https://github.com/strongreasons/AnyKernel3 -b hmp-12 AnyKernel
+   git clone --depth=1 https://github.com/strongreasons/AnyKernel3 -b eas AnyKernel
 	cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
