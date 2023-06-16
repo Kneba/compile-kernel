@@ -41,7 +41,7 @@ VARIANT=EAS
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/platform_kernel_asus_sdm660 -b clo-eas kernel
+git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b caf-eas kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
