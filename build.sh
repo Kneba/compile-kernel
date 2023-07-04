@@ -32,7 +32,7 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=CLO
+VERSION=9x13
 KERNELNAME=TheOneMemory
 CODENAME=Hayzel
 VARIANT=EAS-CLO
