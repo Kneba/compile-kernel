@@ -32,10 +32,10 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=9x13
+VERSION=CLO
 KERNELNAME=TheOneMemory
 CODENAME=Hayzel
-VARIANT=EAS
+VARIANT=EAS-CLO
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
@@ -155,8 +155,8 @@ function zipping() {
     msg "|| Signing Zip ||"
     tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
 
-    curl -sLo zipsigner.jar https://raw.githubusercontent.com/MrRob0-X/zipsigner-3.0/zipsigner/zipsigner.jar
-    java -jar zipsigner.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
+    curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
+    java -jar zipsigner-3.0.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
     ZIP_FINAL="$ZIP_FINAL-signed"
     cd ..
 }
