@@ -31,13 +31,13 @@ ClangPath="${MainClangPath}"
 VERSION=9x13
 KERNELNAME=TheOneMemory
 CODENAME=Hayzel
-VARIANT=HMP
+VARIANT=Onyx
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/Ruega-Kernel-X00T -b hayzel kernel
+git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b onyx kernel
 
 # Clone StRess Clang
 ClangPath=${MainClangPath}
