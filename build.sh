@@ -32,16 +32,16 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=9x13
+VERSION=EOL
 KERNELNAME=TheOneMemory
-CODENAME=Hayzel
-VARIANT=EAS
+CODENAME=Onyx
+VARIANT=HMP
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b caf-eas kernel
+git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -84,6 +84,10 @@ tg_post_msg() {
     -d "parse_mode=html" \
     -d text="$1"
 }
+# Get Kernel Info
+GetKernelInfo(){
+	KVer=$(make kernelversion)
+}
 # Compiler
 compile(){
 cd ${KERNEL_ROOTDIR}
@@ -106,7 +110,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone --depth=1 https://github.com/strongreasons/AnyKernel3 -b eas AnyKernel
+   git clone --depth=1 https://github.com/strongreasons/AnyKernel3 -b hmp-12 AnyKernel
 	cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
@@ -123,7 +127,7 @@ function push() {
         -<code>$DATE</code>
 
         <b>🐧 Linux Version: </b>
-        -<code>4.4.205</code>
+        -<code>$KVer</code>
 
          <b>💿 Compiler: </b>
         -<code>$KBUILD_COMPILER_STRING</code>
@@ -134,7 +138,7 @@ function push() {
         <b>🆑 Changelog: </b>
         - <code>$COMMIT_HEAD</code>
         <b></b>
-        #TheOneMemory #$CODENAME #$VARIANT"
+        #$KERNELNAME #$CODENAME #$VARIANT"
 }
 # Find Error
 function finerr() {
