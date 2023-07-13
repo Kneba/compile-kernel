@@ -32,7 +32,7 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=EOL
+VERSION=4.4.302
 KERNELNAME=TheOneMemory
 CODENAME=Onyx
 VARIANT=HMP
@@ -41,7 +41,7 @@ VARIANT=HMP
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 --depth=1 kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -106,7 +106,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone --depth=1 https://github.com/Kneba/AnyKernel3 -b aroma-hmp AnyKernel
+   git clone https://github.com/Kneba/AnyKernel3 -b aroma-hmp AnyKernel
    cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
@@ -144,7 +144,7 @@ function finerr() {
 }
 # Zipping
 function zipping() {
-    cd AnyKernel
+    cd AnyKernel || exit 1
     cp -af $KERNEL_ROOTDIR/init.OnyxSpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
     cp -af $KERNEL_ROOTDIR/changelog META-INF/com/google/android/aroma/changelog.txt
     cp -af anykernel-real.sh anykernel.sh
