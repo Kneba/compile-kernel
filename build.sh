@@ -107,7 +107,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 
    msg "|| Cloning AnyKernel ||"
    git clone --depth=1 https://github.com/Kneba/AnyKernel3 -b aroma-hmp AnyKernel
-	cp $IMAGE AnyKernel
+   cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
 function push() {
@@ -145,12 +145,12 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel
-    cp -af $KERNEL_ROOTDIR/init.TheOneMemorySpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
+    cp -af $KERNEL_ROOTDIR/init.OnyxSpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
     cp -af $KERNEL_ROOTDIR/changelog META-INF/com/google/android/aroma/changelog.txt
     cp -af anykernel-real.sh anykernel.sh
     sed -i "s/kernel.string=.*/kernel.string=$KERNELNAME/g" anykernel.sh
     sed -i "s/kernel.type=.*/kernel.type=$VARIANT/g" anykernel.sh
-    sed -i "s/kernel.for=.*/kernel.for=X00TD/g" anykernel.sh
+    sed -i "s/kernel.for=.*/kernel.for=$KERNELNAME-$CODENAME/g" anykernel.sh
     sed -i "s/kernel.compiler=.*/kernel.compiler=$KBUILD_COMPILER_STRING/g" anykernel.sh
     sed -i "s/kernel.made=.*/kernel.made=dotkit @fakedotkit/g" anykernel.sh
     sed -i "s/kernel.version=.*/kernel.version=$VERSION/g" anykernel.sh
@@ -168,19 +168,20 @@ function zipping() {
     sed -i "s/KNAME/$KERNELNAME/g" aroma-config
     sed -i "s/KVER/$VERSION/g" aroma-config
     sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
-    sed -i "s/KDEVICE/X00TD/g" aroma-config
+    sed -i "s/KDEVICE/Zenfone Max Pro M1 (X00TD)/g" aroma-config
     sed -i "s/KBDATE/$DATE/g" aroma-config
+    sed -i "s/KVARIANT/Overclocked/g" aroma-config
     cd ../../../..
 
-    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" . -x ".git*" -x "README.md" -x "anykernel-real.sh" -x "zipsigner*" "*.zip"
+    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
 
     ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
 
     msg "|| Signing Zip ||"
     tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
 
-    curl -sLo zipsigner.jar https://raw.githubusercontent.com/MrRob0-X/zipsigner-3.0/zipsigner/zipsigner.jar
-    java -jar zipsigner.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
+    curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
+    java -jar zipsigner-3.0.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
     ZIP_FINAL="$ZIP_FINAL-signed"
     cd ..
 }
