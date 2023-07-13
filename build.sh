@@ -172,7 +172,7 @@ function zipping() {
     sed -i "s/KBDATE/$DATE/g" aroma-config
     cd ../../../..
 
-    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" . -x ".git*" -x "README.md" -x "zipsigner*" "*.zip"
+    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" . -x ".git*" -x "README.md" -x "anykernel-real.sh" -x "zipsigner*" "*.zip"
 
     ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
 
