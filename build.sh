@@ -145,8 +145,8 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel
-    cp -af $MainPath/init.TheOneMemorySpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
-    cp -af $MainPath/changelog META-INF/com/google/android/aroma/changelog.txt
+    cp -af $KERNEL_ROOTDIR/init.TheOneMemorySpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
+    cp -af $KERNEL_ROOTDIR/changelog META-INF/com/google/android/aroma/changelog.txt
     cp -af anykernel-real.sh anykernel.sh
     sed -i "s/kernel.string=.*/kernel.string=$KERNELNAME/g" anykernel.sh
     sed -i "s/kernel.type=.*/kernel.type=$VARIANT/g" anykernel.sh
@@ -164,13 +164,13 @@ function zipping() {
     sed -i "s/device.name4=.*/device.name4=ASUS_X00TD/g" anykernel.sh
     sed -i "s/device.name5=.*/device.name5=ASUS_X00T/g" anykernel.sh
     sed -i "s/X00TD=.*/X00TD=1/g" anykernel.sh
-    cd AnyKernel/META-INF/com/google/android
+    cd META-INF/com/google/android
     sed -i "s/KNAME/$KERNELNAME/g" aroma-config
     sed -i "s/KVER/$VERSION/g" aroma-config
     sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
     sed -i "s/KDEVICE/X00TD/g" aroma-config
     sed -i "s/KBDATE/$DATE/g" aroma-config
-    cd AnyKernel
+    cd ../../../..
 
     zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" . -x ".git*" -x "README.md" -x "zipsigner*" "*.zip"
 
