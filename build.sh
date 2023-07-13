@@ -41,7 +41,7 @@ VARIANT=HMP
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 --depth=1 kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -84,10 +84,6 @@ tg_post_msg() {
     -d "parse_mode=html" \
     -d text="$1"
 }
-# Get Kernel Info
-GetKernelInfo(){
-	KVer=$(make kernelversion)
-}
 # Compiler
 compile(){
 cd ${KERNEL_ROOTDIR}
@@ -110,7 +106,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone --depth=1 https://github.com/strongreasons/AnyKernel3 -b hmp-12 AnyKernel
+   git clone --depth=1 https://github.com/Kneba/AnyKernel3 -b aroma-hmp AnyKernel
 	cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
@@ -125,9 +121,6 @@ function push() {
 
         <b>📅 Build Date: </b>
         -<code>$DATE</code>
-
-        <b>🐧 Linux Version: </b>
-        -<code>$KVer</code>
 
          <b>💿 Compiler: </b>
         -<code>$KBUILD_COMPILER_STRING</code>
@@ -151,7 +144,34 @@ function finerr() {
 }
 # Zipping
 function zipping() {
-    cd AnyKernel || exit 1
+    cd AnyKernel
+    cp -af $MainPath/init.TheOneMemorySpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
+    cp -af $MainPath/changelog META-INF/com/google/android/aroma/changelog.txt
+    cp -af anykernel-real.sh anykernel.sh
+    sed -i "s/kernel.string=.*/kernel.string=$KERNELNAME/g" anykernel.sh
+    sed -i "s/kernel.type=.*/kernel.type=$VARIANT/g" anykernel.sh
+    sed -i "s/kernel.for=.*/kernel.for=X00TD/g" anykernel.sh
+    sed -i "s/kernel.compiler=.*/kernel.compiler=$KBUILD_COMPILER_STRING/g" anykernel.sh
+    sed -i "s/kernel.made=.*/kernel.made=dotkit @fakedotkit/g" anykernel.sh
+    sed -i "s/kernel.version=.*/kernel.version=$VERSION/g" anykernel.sh
+    sed -i "s/message.word=.*/message.word=Appreciate your efforts for choosing TheOneMemory kernel./g" anykernel.sh
+    sed -i "s/build.date=.*/build.date=$DATE/g" anykernel.sh
+    sed -i "s/build.type=.*/build.type=$CODENAME/g" anykernel.sh
+    sed -i "s/supported.versions=.*/supported.versions=9-13/g" anykernel.sh
+    sed -i "s/device.name1=.*/device.name1=X00TD/g" anykernel.sh
+    sed -i "s/device.name2=.*/device.name2=X00T/g" anykernel.sh
+    sed -i "s/device.name3=.*/device.name3=Zenfone Max Pro M1 (X00TD)/g" anykernel.sh
+    sed -i "s/device.name4=.*/device.name4=ASUS_X00TD/g" anykernel.sh
+    sed -i "s/device.name5=.*/device.name5=ASUS_X00T/g" anykernel.sh
+    sed -i "s/X00TD=.*/X00TD=1/g" anykernel.sh
+    cd AnyKernel/META-INF/com/google/android
+    sed -i "s/KNAME/$KERNELNAME/g" aroma-config
+    sed -i "s/KVER/$VERSION/g" aroma-config
+    sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
+    sed -i "s/KDEVICE/X00TD/g" aroma-config
+    sed -i "s/KBDATE/$DATE/g" aroma-config
+    cd AnyKernel
+
     zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" . -x ".git*" -x "README.md" -x "zipsigner*" "*.zip"
 
     ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
