@@ -106,7 +106,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone https://github.com/Tiktodz/AnyKernel3 -b aroma AnyKernel
+   git clone https://github.com/Tiktodz/AnyKernel3 -b hmp AnyKernel
    cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
@@ -121,6 +121,9 @@ function push() {
 
         <b>📅 Build Date: </b>
         -<code>$DATE</code>
+
+        <b>🐧 Linux Version: </b>
+        -<code>$VERSION</code>
 
          <b>💿 Compiler: </b>
         -<code>$KBUILD_COMPILER_STRING</code>
@@ -170,12 +173,12 @@ function zipping() {
     sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
     sed -i "s/KDEVICE/Zenfone Max Pro M1/g" aroma-config
     sed -i "s/KBDATE/$DATE/g" aroma-config
-    sed -i "s/KVARIANT/$KERNELNAME-$CODENAME-$VARIANT/g" aroma-config
+    sed -i "s/KVARIANT/$CODENAME-$VARIANT/g" aroma-config
     cd ../../../..
 
-    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
+    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-$VERSION-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
 
-    ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
+    ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$VERSION-$DATE"
 
     msg "|| Signing Zip ||"
     tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
