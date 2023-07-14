@@ -35,7 +35,7 @@ GCCbPath="${MainGCCbPath}"
 VERSION=4.4.205
 KERNELNAME=TheOneMemory
 CODENAME=Hayzel
-VARIANT=HMP
+VARIANT=HMP-CLO
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
@@ -176,9 +176,9 @@ function zipping() {
     sed -i "s/KVARIANT/$CODENAME-$VARIANT/g" aroma-config
     cd ../../../..
 
-    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-$VERSION-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
+    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
 
-    ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$VERSION-$DATE"
+    ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
 
     msg "|| Signing Zip ||"
     tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
