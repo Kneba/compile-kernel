@@ -173,7 +173,7 @@ function zipping() {
     sed -i "s/KVARIANT/Overclocked/g" aroma-config
     cd ../../../..
 
-    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-$VERSION-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
+    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
 
     ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
 
