@@ -168,9 +168,9 @@ function zipping() {
     sed -i "s/KNAME/$KERNELNAME/g" aroma-config
     sed -i "s/KVER/$VERSION/g" aroma-config
     sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
-    sed -i "s/KDEVICE/Zenfone Max Pro M1 (X00TD)/g" aroma-config
+    sed -i "s/KDEVICE/Zenfone Max Pro M1/g" aroma-config
     sed -i "s/KBDATE/$DATE/g" aroma-config
-    sed -i "s/KVARIANT/Overclocked/g" aroma-config
+    sed -i "s/KVARIANT/$KERNELNAME-$CODENAME-$VARIANT/g" aroma-config
     cd ../../../..
 
     zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
