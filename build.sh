@@ -149,7 +149,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    cp -af $KERNEL_ROOTDIR/init.HayzelSpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
+    cp -af $KERNEL_ROOTDIR/init.OnyxSpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
     cp -af $KERNEL_ROOTDIR/changelog META-INF/com/google/android/aroma/changelog.txt
     cp -af anykernel-real.sh anykernel.sh
     sed -i "s/kernel.string=.*/kernel.string=$KERNELNAME/g" anykernel.sh
