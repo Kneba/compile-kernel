@@ -35,14 +35,14 @@ GCCbPath="${MainGCCbPath}"
 VERSION=4.4.205
 KERNELNAME=TheOneMemory
 CODENAME=Onyx
-VARIANT=HMP
+VARIANT=EAS
 BASE=CLO
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b caf-hmp-oc-ksu kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b caf-eas-oc-ksu kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -60,7 +60,7 @@ msg "|| Cloning GCC 4.9.x toolchain ||"
 git clone --depth=1 https://github.com/Kneba/aarch64-linux-android-4.9 $GCCaPath
 git clone --depth=1 https://github.com/Kneba/arm-linux-androideabi-4.9 $GCCbPath
 
-# Prepared
+# Prepare
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
@@ -107,7 +107,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone https://github.com/Tiktodz/AnyKernel3 -b hmp AnyKernel
+   git clone https://github.com/Tiktodz/AnyKernel3 -b eas AnyKernel
    cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
