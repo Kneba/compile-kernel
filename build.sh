@@ -35,14 +35,14 @@ GCCbPath="${MainGCCbPath}"
 VERSION=4.4.205
 KERNELNAME=TheOneMemory
 CODENAME=Hayzel
-VARIANT=EAS
+VARIANT=HMP
 BASE=CLO
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b caf-eas-ksu kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b caf-hmp-ksu kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -107,7 +107,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone https://github.com/Tiktodz/AnyKernel3 -b eas AnyKernel
+   git clone https://github.com/Tiktodz/AnyKernel3 -b hmp AnyKernel
    cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
