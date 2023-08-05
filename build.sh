@@ -32,6 +32,7 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
+VERSION=4.4.205
 KERNELNAME=TheOneMemory
 CODENAME=Hayzel
 VARIANT=HMP
@@ -67,8 +68,6 @@ CLANG_VER="Snapdragon clang version 14.1.5"
 #LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER X GCC 4.9"
 ClangMoreStrings="AR=llvm-ar NM=llvm-nm AS=llvm-as STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf HOSTAR=llvm-ar HOSTAS=llvm-as LD_LIBRARY_PATH=$ClangPath/lib LD=ld.lld HOSTLD=ld.lld"
-# Check Kernel Version
-KERVER=$(make kernelversion)
 export TZ=Asia/Jakarta
 DATE=$(date +"%Y-%m-%d")
 START=$(date +"%s")
@@ -158,7 +157,7 @@ function zipping() {
     sed -i "s/kernel.for=.*/kernel.for=$CODENAME/g" anykernel.sh
     sed -i "s/kernel.compiler=.*/kernel.compiler=$KBUILD_COMPILER_STRING/g" anykernel.sh
     sed -i "s/kernel.made=.*/kernel.made=dotkit @fakedotkit/g" anykernel.sh
-    sed -i "s/kernel.version=.*/kernel.version=$KERVER/g" anykernel.sh
+    sed -i "s/kernel.version=.*/kernel.version=$VERSION/g" anykernel.sh
     sed -i "s/message.word=.*/message.word=Appreciate your efforts for choosing TheOneMemory kernel./g" anykernel.sh
     sed -i "s/build.date=.*/build.date=$DATE/g" anykernel.sh
     sed -i "s/build.type=.*/build.type=$CODENAME/g" anykernel.sh
@@ -171,7 +170,7 @@ function zipping() {
     sed -i "s/X00TD=.*/X00TD=1/g" anykernel.sh
     cd META-INF/com/google/android
     sed -i "s/KNAME/$KERNELNAME/g" aroma-config
-    sed -i "s/KVER/$KERVER/g" aroma-config
+    sed -i "s/KVER/$VERSION/g" aroma-config
     sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
     sed -i "s/KDEVICE/Zenfone Max Pro M1/g" aroma-config
     sed -i "s/KBDATE/$DATE/g" aroma-config
@@ -190,6 +189,7 @@ function zipping() {
     ZIP_FINAL="$ZIP_FINAL-signed"
     cd ..
 }
+
 compile
 zipping
 END=$(date +"%s")
