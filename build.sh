@@ -32,7 +32,6 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=4.4.205
 KERNELNAME=TheOneMemory
 CODENAME=Hayzel
 VARIANT=HMP
