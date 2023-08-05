@@ -160,7 +160,7 @@ function zipping() {
     sed -i "s/kernel.version=.*/kernel.version=$VERSION/g" anykernel.sh
     sed -i "s/message.word=.*/message.word=Appreciate your efforts for choosing TheOneMemory kernel./g" anykernel.sh
     sed -i "s/build.date=.*/build.date=$DATE/g" anykernel.sh
-    sed -i "s/build.type=.*/build.type=$CODENAME/g" anykernel.sh
+    sed -i "s/build.type=.*/build.type=$BASE/g" anykernel.sh
     sed -i "s/supported.versions=.*/supported.versions=9-13/g" anykernel.sh
     sed -i "s/device.name1=.*/device.name1=X00TD/g" anykernel.sh
     sed -i "s/device.name2=.*/device.name2=X00T/g" anykernel.sh
