@@ -41,7 +41,7 @@ VARIANT=HMP
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Kneba/platform_kernel_asus_sdm660 -b ksu kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -145,12 +145,12 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    cp -af $KERNEL_ROOTDIR/init.OnyxSpectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
+    cp -af $KERNEL_ROOTDIR/init.$CODENAME.Spectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
     cp -af $KERNEL_ROOTDIR/changelog META-INF/com/google/android/aroma/changelog.txt
     cp -af anykernel-real.sh anykernel.sh
     sed -i "s/kernel.string=.*/kernel.string=$KERNELNAME/g" anykernel.sh
     sed -i "s/kernel.type=.*/kernel.type=$VARIANT/g" anykernel.sh
-    sed -i "s/kernel.for=.*/kernel.for=$KERNELNAME-$CODENAME/g" anykernel.sh
+    sed -i "s/kernel.for=.*/kernel.for=$CODENAME/g" anykernel.sh
     sed -i "s/kernel.compiler=.*/kernel.compiler=$KBUILD_COMPILER_STRING/g" anykernel.sh
     sed -i "s/kernel.made=.*/kernel.made=dotkit @fakedotkit/g" anykernel.sh
     sed -i "s/kernel.version=.*/kernel.version=$VERSION/g" anykernel.sh
