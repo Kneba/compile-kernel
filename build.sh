@@ -32,16 +32,16 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=4.4.302
-KERNELNAME=TheOneMemory
-CODENAME=Onyx
-VARIANT=HMP
+VERSION=4.14.233
+KERNELNAME=SilonT
+CODENAME=FBK
+VARIANT=EAS
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Kneba/platform_kernel_asus_sdm660 -b ksu kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/inex-droid/kernel_xiaomi_surya kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -90,7 +90,7 @@ cd ${KERNEL_ROOTDIR}
 msg "|| Cooking kernel. . . ||"
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 X00TD_defconfig
+make -j$(nproc) O=out ARCH=arm64 surya_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     PATH=$ClangPath/bin:$GCCaPath/bin:$GCCbPath/bin:/usr/bin:${PATH} \
     CC=clang \
