@@ -41,6 +41,9 @@ BASE=CLO
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
+# Changelogs
+CL_URL="https://github.com/Tiktodz/android_kernel_asus_sdm636/commits/codelinaro-hmp"
+
 # Clone Kernel Source
 git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 kernel
 
@@ -133,7 +136,7 @@ function push() {
         -<code>$DEVICE_CODENAME($MANUFACTURERINFO)</code>
 
         <b>🆑 Changelog: </b>
-        - <code>$COMMIT_HEAD</code>
+        - <code>%0A<a href='$CL_URL'>Here</a></code>
         <b></b>
         #$KERNELNAME #$CODENAME #$VARIANT"
 }
