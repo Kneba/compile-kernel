@@ -42,7 +42,7 @@ BASE=CLO
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/kernel_asus_sdm636 -b hmp kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
