@@ -41,6 +41,7 @@ export KBUILD_COMPILER_STRING="$CLANG_VER"
 DATE=$(date +"%F-%S")
 START=$(date +"%s")
 PATH=${ClangPath}/bin:${GCCaPath}/bin:${GCCbPath}/bin:${PATH}
+export TZ=Asia/Jakarta
 
 # Telegram
 export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
@@ -107,7 +108,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 $KERNELNAME-HMP-$DEVICE_CODENAME-4.19.300.zip *
+    zip -r9 $KERNELNAME-4.19-$DEVICE_CODENAME-$DATE.zip *
     cd ..
 }
 compile
