@@ -26,26 +26,26 @@ cdir() {
 MainPath="$(pwd)"
 MainClangPath="${MainPath}/clang"
 ClangPath="${MainClangPath}"
-MainGCCaPath="${MainPath}/GCC64"
-MainGCCbPath="${MainPath}/GCC32"
-GCCaPath="${MainGCCaPath}"
-GCCbPath="${MainGCCbPath}"
+#MainGCCaPath="${MainPath}/GCC64"
+#MainGCCbPath="${MainPath}/GCC32"
+#GCCaPath="${MainGCCaPath}"
+#GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=4.4.205
+VERSION=4.19.300
 KERNELNAME=TheOneMemory
 CODENAME=Hayzel
-VARIANT=HMP
+VARIANT=EAS
 BASE=CLO
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Changelogs
-CL_URL="https://github.com/Tiktodz/android_kernel_asus_sdm636/commits/codelinaro-hmp"
+CL_URL="https://github.com/Tiktodz/android_kernel_asus_sdm660-4.19/commits/r2/s"
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -53,23 +53,22 @@ ClangPath=${MainClangPath}
 mkdir $ClangPath
 rm -rf $ClangPath/*
 msg "|| Cloning sdclang toolchain ||"
-git clone --depth=1 https://github.com/RyuujiX/SDClang -b 14 $ClangPath
+git clone --depth=1 https://gitlab.com/varunhardgamer/trb_clang -b 17 $ClangPath
 
 # Clone GCC
-mkdir $GCCaPath
-mkdir $GCCbPath
+#mkdir $GCCaPath
+#mkdir $GCCbPath
 
-msg "|| Cloning GCC 4.9.x toolchain ||"
-git clone --depth=1 https://github.com/Kneba/aarch64-linux-android-4.9 $GCCaPath
-git clone --depth=1 https://github.com/Kneba/arm-linux-androideabi-4.9 $GCCbPath
+#msg "|| Cloning GCC 4.9.x toolchain ||"
+#git clone --depth=1 https://github.com/Kneba/aarch64-linux-android-4.9 $GCCaPath
+#git clone --depth=1 https://github.com/Kneba/arm-linux-androideabi-4.9 $GCCbPath
 
 # Prepare
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
+export LD=ld.lld
+export LD_LIBRARY_PATH=$ClangPath/lib
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
-CLANG_VER="Snapdragon clang version 14.1.5"
-#LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER X GCC 4.9"
 ClangMoreStrings="AR=llvm-ar NM=llvm-nm AS=llvm-as STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf HOSTAR=llvm-ar HOSTAS=llvm-as LD_LIBRARY_PATH=$ClangPath/lib LD=ld.lld HOSTLD=ld.lld"
 export TZ=Asia/Jakarta
 DATE=$(date +"%Y-%m-%d")
@@ -94,15 +93,13 @@ cd ${KERNEL_ROOTDIR}
 msg "|| Cooking kernel. . . ||"
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 X00TD_defconfig
+make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
-     PATH=$ClangPath/bin:$GCCaPath/bin:$GCCbPath/bin:/usr/bin:${PATH} \
+     PATH=$ClangPath/bin:${PATH} \
      CC=clang \
-     CROSS_COMPILE=aarch64-linux-android- \
-     CROSS_COMPILE_ARM32=arm-linux-androideabi- \
-     CLANG_TRIPLE=aarch64-linux-gnu- \
-     HOSTCC=gcc \
-     HOSTCXX=g++ ${ClangMoreStrings}
+     CROSS_COMPILE=aarch64-linux-gnu- \
+     HOSTCC=clang \
+     HOSTCXX=clang++ ${ClangMoreStrings}
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
@@ -152,35 +149,8 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    cp -af $KERNEL_ROOTDIR/init.$CODENAME-Spectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
-    cp -af $KERNEL_ROOTDIR/changelog META-INF/com/google/android/aroma/changelog.txt
-    cp -af anykernel-real.sh anykernel.sh
-    sed -i "s/kernel.string=.*/kernel.string=$KERNELNAME/g" anykernel.sh
-    sed -i "s/kernel.type=.*/kernel.type=$VARIANT/g" anykernel.sh
-    sed -i "s/kernel.for=.*/kernel.for=$CODENAME/g" anykernel.sh
-    sed -i "s/kernel.compiler=.*/kernel.compiler=$KBUILD_COMPILER_STRING/g" anykernel.sh
-    sed -i "s/kernel.made=.*/kernel.made=dotkit @fakedotkit/g" anykernel.sh
-    sed -i "s/kernel.version=.*/kernel.version=$VERSION/g" anykernel.sh
-    sed -i "s/message.word=.*/message.word=Appreciate your efforts for choosing TheOneMemory kernel./g" anykernel.sh
-    sed -i "s/build.date=.*/build.date=$DATE/g" anykernel.sh
-    sed -i "s/build.type=.*/build.type=$BASE/g" anykernel.sh
-    sed -i "s/supported.versions=.*/supported.versions=9-13/g" anykernel.sh
-    sed -i "s/device.name1=.*/device.name1=X00TD/g" anykernel.sh
-    sed -i "s/device.name2=.*/device.name2=X00T/g" anykernel.sh
-    sed -i "s/device.name3=.*/device.name3=Zenfone Max Pro M1 (X00TD)/g" anykernel.sh
-    sed -i "s/device.name4=.*/device.name4=ASUS_X00TD/g" anykernel.sh
-    sed -i "s/device.name5=.*/device.name5=ASUS_X00T/g" anykernel.sh
-    sed -i "s/X00TD=.*/X00TD=1/g" anykernel.sh
-    cd META-INF/com/google/android
-    sed -i "s/KNAME/$KERNELNAME/g" aroma-config
-    sed -i "s/KVER/$VERSION/g" aroma-config
-    sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
-    sed -i "s/KDEVICE/Zenfone Max Pro M1/g" aroma-config
-    sed -i "s/KBDATE/$DATE/g" aroma-config
-    sed -i "s/KVARIANT/$VARIANT/g" aroma-config
-    cd ../../../..
 
-    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-$BASE-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
+    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-$BASE-"$DATE" * -x .git README.md anykernel.sh .gitignore zipsigner* *.zip
 
     ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$BASE-$DATE"
 
