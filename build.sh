@@ -32,8 +32,8 @@ tar -xf gcc32.tar.gz -C $GCCbPath
 # Prepared
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export LD=ld.lld
-export KERNELNAME=perf
-export KBUILD_BUILD_USER=rj # Change with your own name or else.
+export KERNELNAME=TheOneMemory
+export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 #LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
@@ -108,7 +108,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 $KERNELNAME-4.19-X00TD-$DATE.zip *
+    zip -r9 [11.14]$KERNELNAME-Kernel-X00TD-4.19-$DATE.zip *
     cd ..
 }
 compile
