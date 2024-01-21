@@ -3,25 +3,6 @@
 # Copyright (C) 2023 Kneba <abenkenary3@gmail.com>
 #
 
-#
-# Function to show an informational message
-#
-
-msg() {
-	echo
-    echo -e "\e[1;32m$*\e[0m"
-    echo
-}
-
-err() {
-    echo -e "\e[1;41m$*\e[0m"
-}
-
-cdir() {
-	cd "$1" 2>/dev/null || \
-		err "The directory $1 doesn't exists !"
-}
-
 # Main
 MainPath="$(pwd)"
 MainClangPath="${MainPath}/clang"
@@ -32,16 +13,6 @@ GCCbPath="${MainPath}/GCC32"
 MainZipGCCaPath="${MainPath}/GCC64-zip"
 MainZipGCCbPath="${MainPath}/GCC32-zip"
 
-# Identity
-VERSION=4.4.302
-KERNELNAME=TheOneMemory
-CODENAME=Hayzel
-VARIANT=HMP
-
-# Show manufacturer info
-MANUFACTURERINFO="ASUSTek Computer Inc."
-
-# Clone Kernel Source
 git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b eol kernel
 
 ClangPath=${MainClangZipPath}
@@ -51,7 +22,6 @@ rm -rf $ClangPath/*
 wget -q  https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz -O "clang-r487747c.tar.gz"
 tar -xf clang-r487747c.tar.gz -C $ClangPath
 
-# Clone GCC
 mkdir $GCCaPath
 mkdir $GCCbPath
 wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-12.1.0_r16.tar.gz -O "gcc64.tar.gz"
@@ -61,30 +31,30 @@ tar -xf gcc32.tar.gz -C $GCCbPath
 
 # Prepared
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
+export LD=ld.lld
+export KERNELNAME=TheOneMemory # Change with your localversion name or else.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
+#LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER"
 DATE=$(date +"%F-%S")
 START=$(date +"%s")
 PATH=${ClangPath}/bin:${GCCaPath}/bin:${GCCbPath}/bin:${PATH}
 export TZ=Asia/Jakarta
 
-# Java
-command -v java > /dev/null 2>&1
-
 # Telegram
 export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
 
-# Telegram messaging
 tg_post_msg() {
   curl -s -X POST "$BOT_MSG_URL" -d chat_id="$TG_CHAT_ID" \
-    -d "disable_web_page_preview=true" \
-    -d "parse_mode=html" \
-    -d text="$1"
+  -d "disable_web_page_preview=true" \
+  -d "parse_mode=html" \
+  -d text="$1"
+
 }
-# Compiler
+
+# Compile
 compile(){
 cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
@@ -112,49 +82,32 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 	finerr
 	exit 1
    fi
-
-   msg "|| Cloning AnyKernel ||"
-   git clone https://github.com/Tiktodz/AnyKernel3 -b hmp AnyKernel
-   cp $IMAGE AnyKernel
+  git clone https://github.com/Tiktodz/AnyKernel3 -b hmp AnyKernel
+	cp $IMAGE AnyKernel
 }
-# Push kernel to telegram
+# Push kernel to channel
 function push() {
     cd AnyKernel
-    curl -F document="@$ZIP_FINAL.zip" "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
+    ZIP=$(echo *.zip)
+    curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=html" \
-        -F caption="🔐<b>Build Done</b>
-        - <code>$((DIFF / 60)) minute(s) $((DIFF % 60)) second(s)... </code>
-
-        <b>📅 Build Date: </b>
-        -<code>$DATE</code>
-
-         <b>💿 Compiler: </b>
-        -<code>$KBUILD_COMPILER_STRING</code>
-
-        <b>📱 Device: </b>
-        -<code>$DEVICE_CODENAME($MANUFACTURERINFO)</code>
-
-        <b>🆑 Changelog: </b>
-        - <code>$COMMIT_HEAD</code>
-        <b></b>
-        #$KERNELNAME #$CODENAME #$VARIANT"
+        -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>$DEVICE_CODENAME</b> | <b>${KBUILD_COMPILER_STRING}</b>"
 }
-# Find Error
+# Fin Error
 function finerr() {
     curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
         -d chat_id="$TG_CHAT_ID" \
         -d "disable_web_page_preview=true" \
         -d "parse_mode=markdown" \
-        -d text="❌ Tetap menyerah...Pasti bisa!!!"
+        -d text="I'm tired of compiling kernels,And I choose to give up...please give me motivation"
     exit 1
 }
+
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    cp -af $KERNEL_ROOTDIR/init.$CODENAME.Spectrum.rc spectrum/init.spectrum.rc && sed -i "s/persist.spectrum.kernel.*/persist.spectrum.kernel TheOneMemory/g" spectrum/init.spectrum.rc
-    cp -af $KERNEL_ROOTDIR/changelog META-INF/com/google/android/aroma/changelog.txt
     cp -af anykernel-real.sh anykernel.sh
     sed -i "s/kernel.string=.*/kernel.string=$KERNELNAME/g" anykernel.sh
     sed -i "s/kernel.type=.*/kernel.type=$VARIANT/g" anykernel.sh
@@ -181,9 +134,9 @@ function zipping() {
     sed -i "s/KVARIANT/Overclocked/g" aroma-config
     cd ../../../..
 
-    zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
+    zip -r9 $KERNELNAME-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
 
-    ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
+    ZIP_FINAL="$KERNELNAME-$DATE"
 
     msg "|| Signing Zip ||"
     tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
