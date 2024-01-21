@@ -25,11 +25,12 @@ cdir() {
 # Main
 MainPath="$(pwd)"
 MainClangPath="${MainPath}/clang"
-ClangPath="${MainClangPath}"
-MainGCCaPath="${MainPath}/GCC64"
-MainGCCbPath="${MainPath}/GCC32"
-GCCaPath="${MainGCCaPath}"
-GCCbPath="${MainGCCbPath}"
+MainClangZipPath="${MainPath}/clang-zip"
+ClangPath="${MainClangZipPath}"
+GCCaPath="${MainPath}/GCC64"
+GCCbPath="${MainPath}/GCC32"
+MainZipGCCaPath="${MainPath}/GCC64-zip"
+MainZipGCCbPath="${MainPath}/GCC32-zip"
 
 # Identity
 VERSION=4.4.302
@@ -43,33 +44,32 @@ MANUFACTURERINFO="ASUSTek Computer Inc."
 # Clone Kernel Source
 git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b eol kernel
 
-# Clone Snapdragon Clang
-ClangPath=${MainClangPath}
+ClangPath=${MainClangZipPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
 mkdir $ClangPath
 rm -rf $ClangPath/*
-msg "|| Cloning sdclang toolchain ||"
-git clone --depth=1 https://github.com/RyuujiX/SDClang -b 14 $ClangPath
+wget -q  https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz -O "clang-r487747c.tar.gz"
+tar -xf clang-r487747c.tar.gz -C $ClangPath
 
 # Clone GCC
 mkdir $GCCaPath
 mkdir $GCCbPath
-
-msg "|| Cloning GCC toolchain ||"
-git clone --depth=1 https://github.com/Kneba/aarch64-linux-android-4.9 $GCCaPath
-git clone --depth=1 https://github.com/Kneba/arm-linux-androideabi-4.9 $GCCbPath
+wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-12.1.0_r16.tar.gz -O "gcc64.tar.gz"
+tar -xf gcc64.tar.gz -C $GCCaPath
+wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-12.1.0_r16.tar.gz -O "gcc32.tar.gz"
+tar -xf gcc32.tar.gz -C $GCCbPath
 
 # Prepared
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
-CLANG_VER="Snapdragon clang version 14.1.5"
-#LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER X GCC 4.9"
-ClangMoreStrings="AR=llvm-ar NM=llvm-nm AS=llvm-as STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf HOSTAR=llvm-ar HOSTAS=llvm-as LD_LIBRARY_PATH=$ClangPath/lib LD=ld.lld HOSTLD=ld.lld"
-export TZ=Asia/Jakarta
-DATE=$(date +"%Y-%m-%d")
+CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
+export KBUILD_COMPILER_STRING="$CLANG_VER"
+DATE=$(date +"%F-%S")
 START=$(date +"%s")
+PATH=${ClangPath}/bin:${GCCaPath}/bin:${GCCbPath}/bin:${PATH}
+export TZ=Asia/Jakarta
 
 # Java
 command -v java > /dev/null 2>&1
@@ -87,18 +87,26 @@ tg_post_msg() {
 # Compiler
 compile(){
 cd ${KERNEL_ROOTDIR}
-msg "|| Cooking kernel. . . ||"
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
 make -j$(nproc) O=out ARCH=arm64 X00TD_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
-    PATH=$ClangPath/bin:$GCCaPath/bin:$GCCbPath/bin:/usr/bin:${PATH} \
-    CC=clang \
+    LD_LIBRARY_PATH="${ClangPath}/lib64:${LD_LIBRARY_PATH}" \
+    CC=${ClangPath}/bin/clang \
+    NM=${ClangPath}/bin/llvm-nm \
+    CXX=${ClangPath}/bin/clang++ \
+    AR=${ClangPath}/bin/llvm-ar \
+    STRIP=${ClangPath}/bin/llvm-strip \
+    OBJCOPY=${ClangPath}/bin/llvm-objcopy \
+    OBJDUMP=${ClangPath}/bin/llvm-objdump \
+    OBJSIZE=${ClangPath}/bin/llvm-size \
+    READELF=${ClangPath}/bin/llvm-readelf \
     CROSS_COMPILE=aarch64-linux-android- \
     CROSS_COMPILE_ARM32=arm-linux-androideabi- \
     CLANG_TRIPLE=aarch64-linux-gnu- \
-    HOSTCC=gcc \
-    HOSTCXX=g++ ${ClangMoreStrings}
+    HOSTAR=${ClangPath}/bin/llvm-ar \
+    HOSTCC=${ClangPath}/bin/clang \
+    HOSTCXX=${ClangPath}/bin/clang++
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
