@@ -32,16 +32,16 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-VERSION=4.14.233
-KERNELNAME=SilonT
-CODENAME=FBK
-VARIANT=EAS
+VERSION=4.4.302
+KERNELNAME=TheOneMemory
+CODENAME=Hayzel
+VARIANT=HMP
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/inex-droid/kernel_xiaomi_surya kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b eol kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -90,7 +90,7 @@ cd ${KERNEL_ROOTDIR}
 msg "|| Cooking kernel. . . ||"
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 surya_defconfig
+make -j$(nproc) O=out ARCH=arm64 X00TD_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     PATH=$ClangPath/bin:$GCCaPath/bin:$GCCbPath/bin:/usr/bin:${PATH} \
     CC=clang \
@@ -106,7 +106,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone https://github.com/Kneba/AnyKernel3 -b aroma-hmp AnyKernel
+   git clone https://github.com/Tiktodz/AnyKernel3 -b hmp AnyKernel
    cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
