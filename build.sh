@@ -35,13 +35,13 @@ GCCbPath="${MainGCCbPath}"
 CODENAME=Hayzel
 KERNELNAME=TheOneMemory
 VARIANT=HMP
-VERSION=EOL
+VERSION=CLO
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b eol kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
