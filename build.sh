@@ -173,17 +173,17 @@ function zipping() {
 	sed -i "s/KVARIANT/$VARIANT/g" aroma-config
 	cd ../../../..
 
-	zip -r9 $ZIPNAME-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* "*.zip"
+	zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* "*.zip"
 
-    ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
+	ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
 
-    msg "|| Signing Zip ||"
-    tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
+	msg "|| Signing Zip ||"
+	tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
 
-    curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
-    java -jar zipsigner-3.0.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
-    ZIP_FINAL="$ZIP_FINAL-signed"
-    cd ..
+	curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
+	java -jar zipsigner-3.0.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
+	ZIP_FINAL="$ZIP_FINAL-signed"
+	cd ..
 }
 compile
 zipping
