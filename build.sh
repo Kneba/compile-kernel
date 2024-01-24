@@ -31,6 +31,7 @@ tar -xf gcc32.tar.gz -C $GCCbPath
 
 # Prepare
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
+export TZ=Asia/Jakarta # Change with your local timezone.
 export LD=ld.lld
 export KERNELNAME=TheOneMemory # Change with your localversion name or else.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
@@ -38,10 +39,9 @@ IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 #LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER"
-DATE=$(date +"%Y%m%d"-%F%S)
+DATE=$(TZ=Asia/Jakarta date +"%Y%m%d-%H%M")
 START=$(date +"%s")
 PATH=${ClangPath}/bin:${GCCaPath}/bin:${GCCbPath}/bin:${PATH}
-export TZ=Asia/Jakarta
 
 # Telegram
 export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
