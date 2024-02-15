@@ -92,7 +92,7 @@ function push() {
     curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
-        -F "parse_mode=html" \
+        -F "parse_mode=markdown" \
         -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>$DEVICE_CODENAME</b> | <b>${KBUILD_COMPILER_STRING}</b>"
 }
 # Fin Error
@@ -107,7 +107,7 @@ function finerr() {
 
 # Zipping
 function zipping() {
-    cd AnyKernel
+    cd AnyKernel || exit 1
     zip -r9 [KSU]$KERNELNAME-Kernel-4.19-X00TD-$DATE.zip *
     cd ..
 }
