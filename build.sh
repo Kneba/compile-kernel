@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2022  <abenkenary3@gmail.com>
+# Copyright (C) 2022 <abenkenary3@gmail.com>
 #
 
 # Main
@@ -19,7 +19,7 @@ ClangPath=${MainClangZipPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
 mkdir $ClangPath
 rm -rf $ClangPath/*
-wget -q  https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz -O "clang-r487747c.tar.gz"
+wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz -O "clang-r487747c.tar.gz"
 tar -xf clang-r487747c.tar.gz -C $ClangPath
 
 mkdir $GCCaPath
@@ -107,7 +107,7 @@ function finerr() {
 
 # Zipping
 function zipping() {
-    cd AnyKernel || exit 1
+    cd AnyKernel
     zip -r9 [KSU]$KERNELNAME-Kernel-4.19-X00TD-$DATE.zip *
     cd ..
 }
