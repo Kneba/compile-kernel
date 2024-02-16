@@ -82,8 +82,9 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 	finerr
 	exit 1
    fi
+  cd ${KERNEL_ROOTDIR}
   git clone https://github.com/Tiktodz/AnyKernel3 -b main AnyKernel
-	cp $IMAGE AnyKernel
+  cp $IMAGE AnyKernel/Image.gz-dtb
 }
 # Push kernel to channel
 function push() {
