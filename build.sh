@@ -82,18 +82,19 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 	finerr
 	exit 1
    fi
+  cd ${KERNEL_ROOTDIR}
   git clone https://github.com/Tiktodz/AnyKernel3 -b main AnyKernel
-	cp $IMAGE AnyKernel
+  cp $IMAGE AnyKernel/Image.gz-dtb
 }
 # Push kernel to channel
 function push() {
-    cd AnyKernel
-    ZIP=$(echo *.zip)
-    curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
+    cd ${KERNEL_ROOTDIR}/AnyKernel
+    ZIPNAME=$(echo *.zip)
+    curl -F document=@${ZIPNAME} "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=Markdown" \
-        -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>$DEVICE_CODENAME</b> | <b>${KBUILD_COMPILER_STRING}</b>"
+        -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For $DEVICE_CODENAME | ${KBUILD_COMPILER_STRING}"
 }
 # Fin Error
 function finerr() {
@@ -108,8 +109,8 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 $KERNELNAME-Kernel-X00TD-419-KSU-$DATE.zip *
-    cd ..
+    zip -r9 "$KERNELNAME"-Kernel-X00TD-4_19-KSU-"$DATE" . -x .git README.md .gitignore "*.zip"
+    cd ${KERNEL_ROOTDIR}
 }
 compile
 zipping
