@@ -90,7 +90,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 function push() {
     cd ${KERNEL_ROOTDIR}/AnyKernel
     ZIPNAME=$(echo *.zip)
-    curl --progress-bar -F document="@${ZIPNAME}" "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
+    curl --progress-bar -F document=@"${ZIPNAME}" "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
         -F "parse_mode=Markdown" \
@@ -109,8 +109,8 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 "$KERNELNAME"-Kernel-X00TD-4_19-KSU-"$DATE" . -x ".git* -x README.md -x .gitignore* *.zip"
-    cd ${KERNEL_ROOTDIR}
+    zip -r9 "$KERNELNAME"-Kernel-"$DATE" * -x .git README.md .gitignore zipsigner* *.zip
+    cd ..
 }
 compile
 zipping
