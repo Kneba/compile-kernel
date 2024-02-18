@@ -1,9 +1,9 @@
 #
 # Copyright (C) 2023 RyuujiX <saputradenny712@gmail.com>
-# Copyright (C) 2023 Kneba <abenkenary3@gmail.com>
+# Copyright (C) 2023-2024 Kneba <abenkenary3@gmail.com>
 #
 
-name: Kernel build
+name: Compile kernel
 
 env:
       TOKEN: ${{ secrets.TOKEN }}
@@ -19,7 +19,18 @@ jobs:
     container:
       image: ubuntu:jammy-20211029
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+
+      # Set-up a build date.
+    - name: Set-up build date
+      id: get-date
+      run: |
+        sudo timedatectl set-timezone Asia/Jakarta
+
+      # Set-up output.
+    - name: Set-up output
+      run: echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+
     - name: Setup CI
       run: |
         cp -af sources.list /etc/apt/ &&  cp -af 99own /etc/apt/apt.conf.d/
