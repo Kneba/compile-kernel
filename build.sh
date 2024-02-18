@@ -13,26 +13,26 @@ GCCbPath="${MainPath}/GCC32"
 MainZipGCCaPath="${MainPath}/GCC64-zip"
 MainZipGCCbPath="${MainPath}/GCC32-zip"
 
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 -b eol kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 -b r2/s kernel
 
 ClangPath=${MainClangZipPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
 mkdir $ClangPath
 rm -rf $ClangPath/*
-wget -q  https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz -O "clang-r487747c.tar.gz"
+wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz -O "clang-r487747c.tar.gz"
 tar -xf clang-r487747c.tar.gz -C $ClangPath
 
 mkdir $GCCaPath
 mkdir $GCCbPath
-wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-12.1.0_r16.tar.gz -O "gcc64.tar.gz"
+wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz -O "gcc64.tar.gz"
 tar -xf gcc64.tar.gz -C $GCCaPath
-wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-12.1.0_r16.tar.gz -O "gcc32.tar.gz"
+wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz -O "gcc32.tar.gz"
 tar -xf gcc32.tar.gz -C $GCCbPath
 
 # Prepared
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export LD=ld.lld
-export KERNELNAME=lineageos # Change with your localversion name or else.
+export KERNELNAME=TheOneMemory # Change with your localversion name or else.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
@@ -59,7 +59,7 @@ compile(){
 cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 X00TD_defconfig
+make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig vendor/debugfs.config
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     LD_LIBRARY_PATH="${ClangPath}/lib64:${LD_LIBRARY_PATH}" \
     CC=${ClangPath}/bin/clang \
@@ -82,8 +82,8 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 	finerr
 	exit 1
    fi
-  git clone https://github.com/Tiktodz/AnyKernel3 -b hmp AnyKernel
-	cp $IMAGE AnyKernel
+  git clone https://github.com/Tiktodz/AnyKernel3 -b main AnyKernel
+  cp $IMAGE AnyKernel
 }
 # Push kernel to channel
 function push() {
@@ -118,7 +118,7 @@ function zipping() {
     sed -i "s/message.word=.*/message.word=Appreciate your efforts for choosing TheOneMemory kernel./g" anykernel.sh
     sed -i "s/build.date=.*/build.date=$DATE/g" anykernel.sh
     sed -i "s/build.type=.*/build.type=$CODENAME/g" anykernel.sh
-    sed -i "s/supported.versions=.*/supported.versions=9-13/g" anykernel.sh
+    sed -i "s/supported.versions=.*/supported.versions=11-14/g" anykernel.sh
     sed -i "s/device.name1=.*/device.name1=X00TD/g" anykernel.sh
     sed -i "s/device.name2=.*/device.name2=X00T/g" anykernel.sh
     sed -i "s/device.name3=.*/device.name3=Zenfone Max Pro M1 (X00TD)/g" anykernel.sh
@@ -131,10 +131,10 @@ function zipping() {
     sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
     sed -i "s/KDEVICE/Zenfone Max Pro M1 (X00TD)/g" aroma-config
     sed -i "s/KBDATE/$DATE/g" aroma-config
-    sed -i "s/KVARIANT/Overclocked/g" aroma-config
+    sed -i "s/KVARIANT/Stock-clock/g" aroma-config
     cd ../../../..
 
-    zip -r9 $KERNELNAME-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
+    zip -r9 $KERNELNAME-Kernel-X00TD-4_19-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
 
     ZIP_FINAL="$KERNELNAME-$DATE"
 
