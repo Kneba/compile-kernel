@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2023 Kneba <abenkenary3@gmail.com>
+# Copyright (C) 2022 - 2024 <abenkenary3@gmail.com>
 #
 
 # Main
@@ -13,7 +13,7 @@ GCCbPath="${MainPath}/GCC32"
 MainZipGCCaPath="${MainPath}/GCC64-zip"
 MainZipGCCbPath="${MainPath}/GCC32-zip"
 
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 -b r2/s kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 kernel
 
 ClangPath=${MainClangZipPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
@@ -29,19 +29,19 @@ tar -xf gcc64.tar.gz -C $GCCaPath
 wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz -O "gcc32.tar.gz"
 tar -xf gcc32.tar.gz -C $GCCbPath
 
-# Prepared
+# Prepare
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
+export TZ=Asia/Jakarta # Change with your local timezone.
 export LD=ld.lld
-export KERNELNAME=TheOneMemory # Change with your localversion name or else.
+export KERNELNAME=TheOneMemory-Kernel-4-19-X00TD # Change with your localversion name or else.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 #LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER"
-DATE=$(date +"%F-%S")
+DATE=$(TZ=Asia/Jakarta date +"%Y%m%d-%H%M")
 START=$(date +"%s")
 PATH=${ClangPath}/bin:${GCCaPath}/bin:${GCCbPath}/bin:${PATH}
-export TZ=Asia/Jakarta
 
 # Telegram
 export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
@@ -59,7 +59,7 @@ compile(){
 cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig vendor/debugfs.config
+make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     LD_LIBRARY_PATH="${ClangPath}/lib64:${LD_LIBRARY_PATH}" \
     CC=${ClangPath}/bin/clang \
@@ -83,7 +83,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 	exit 1
    fi
   git clone https://github.com/Tiktodz/AnyKernel3 -b main AnyKernel
-  cp $IMAGE AnyKernel
+	cp $IMAGE AnyKernel
 }
 # Push kernel to channel
 function push() {
@@ -108,42 +108,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    cp -af anykernel-real.sh anykernel.sh
-    sed -i "s/kernel.string=.*/kernel.string=$KERNELNAME/g" anykernel.sh
-    sed -i "s/kernel.type=.*/kernel.type=$VARIANT/g" anykernel.sh
-    sed -i "s/kernel.for=.*/kernel.for=$CODENAME/g" anykernel.sh
-    sed -i "s/kernel.compiler=.*/kernel.compiler=$KBUILD_COMPILER_STRING/g" anykernel.sh
-    sed -i "s/kernel.made=.*/kernel.made=dotkit @fakedotkit/g" anykernel.sh
-    sed -i "s/kernel.version=.*/kernel.version=$VERSION/g" anykernel.sh
-    sed -i "s/message.word=.*/message.word=Appreciate your efforts for choosing TheOneMemory kernel./g" anykernel.sh
-    sed -i "s/build.date=.*/build.date=$DATE/g" anykernel.sh
-    sed -i "s/build.type=.*/build.type=$CODENAME/g" anykernel.sh
-    sed -i "s/supported.versions=.*/supported.versions=11-14/g" anykernel.sh
-    sed -i "s/device.name1=.*/device.name1=X00TD/g" anykernel.sh
-    sed -i "s/device.name2=.*/device.name2=X00T/g" anykernel.sh
-    sed -i "s/device.name3=.*/device.name3=Zenfone Max Pro M1 (X00TD)/g" anykernel.sh
-    sed -i "s/device.name4=.*/device.name4=ASUS_X00TD/g" anykernel.sh
-    sed -i "s/device.name5=.*/device.name5=ASUS_X00T/g" anykernel.sh
-    sed -i "s/X00TD=.*/X00TD=1/g" anykernel.sh
-    cd META-INF/com/google/android
-    sed -i "s/KNAME/$KERNELNAME/g" aroma-config
-    sed -i "s/KVER/$VERSION/g" aroma-config
-    sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
-    sed -i "s/KDEVICE/Zenfone Max Pro M1 (X00TD)/g" aroma-config
-    sed -i "s/KBDATE/$DATE/g" aroma-config
-    sed -i "s/KVARIANT/Stock-clock/g" aroma-config
-    cd ../../../..
-
-    zip -r9 $KERNELNAME-Kernel-X00TD-4_19-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* *.zip
-
-    ZIP_FINAL="$KERNELNAME-$DATE"
-
-    msg "|| Signing Zip ||"
-    tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
-
-    curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
-    java -jar zipsigner-3.0.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
-    ZIP_FINAL="$ZIP_FINAL-signed"
+    zip -r9 [KSU]$KERNELNAME-$DATE.zip *
     cd ..
 }
 compile
