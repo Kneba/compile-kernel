@@ -64,9 +64,8 @@ compile(){
 cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig
-make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
-    LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}" \
+LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}" make -j$(nproc) ARCH=arm64 SUBARCH=arm64 asus/X00TD_defconfig
+make -j$(nproc) O=out \
     CC=${ClangPath}/bin/clang \
     NM=${ClangPath}/bin/llvm-nm \
     CXX=${ClangPath}/bin/clang++ \
