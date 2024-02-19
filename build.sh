@@ -68,20 +68,18 @@ export LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}"
 
 make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
-    CC=${ClangPath}/bin/clang \
-    NM=${ClangPath}/bin/llvm-nm \
-    CXX=${ClangPath}/bin/clang++ \
-    AR=${ClangPath}/bin/llvm-ar \
-    STRIP=${ClangPath}/bin/llvm-strip \
-    OBJCOPY=${ClangPath}/bin/llvm-objcopy \
-    OBJDUMP=${ClangPath}/bin/llvm-objdump \
-    OBJSIZE=${ClangPath}/bin/llvm-size \
-    READELF=${ClangPath}/bin/llvm-readelf \
-    CROSS_COMPILE=aarch64-linux-gnu- \
-    CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-    HOSTAR=${ClangPath}/bin/llvm-ar \
-    HOSTCC=${ClangPath}/bin/clang \
-    HOSTCXX=${ClangPath}/bin/clang++
+		AS="${ClangPath}/bin/llvm-as" \
+		CC="${ClangPath}/bin/clang" \
+		LD="${ClangPath}/bin/ld.lld" \
+		AR="${ClangPath}/bin/llvm-ar" \
+		NM="${ClangPath}/bin/llvm-nm" \
+		STRIP="${ClangPath}/bin/llvm-strip" \
+		OBJCOPY="${ClangPath}/bin/llvm-objcopy" \
+		OBJDUMP="${ClangPath}/bin/llvm-objdump" \
+		CLANG_TRIPLE=aarch64-linux-gnu- \
+		CROSS_COMPILE="${ClangPath}/bin/clang" \
+                CROSS_COMPILE_COMPAT="${ClangPath}/bin/clang" \
+                CROSS_COMPILE_ARM32="${ClangPath}/bin/clang"
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
