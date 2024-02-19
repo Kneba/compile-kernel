@@ -82,7 +82,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 	finerr
 	exit 1
    fi
-  git clone https://github.com/Tiktodz/AnyKernel3 -b main AnyKernel
+  git clone https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel
 	cp $IMAGE AnyKernel
 }
 # Push kernel to channel
