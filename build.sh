@@ -14,7 +14,7 @@ MainPath="$(pwd)"
 # MainZipGCCbPath="${MainPath}/GCC32-zip"
 
 # Clone Kernulnya Boys
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660 kernel
+git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 kernel
 # Clone TeeRBeh Clang
 git clone --depth=1 https://gitlab.com/varunhardgamer/trb_clang.git -b 17 --single-branch clang
 
@@ -64,7 +64,7 @@ compile(){
 cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 vendor/X00TD_defconfig
+make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}" \
     CC=${ClangPath}/bin/clang \
@@ -78,7 +78,6 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     READELF=${ClangPath}/bin/llvm-readelf \
     CROSS_COMPILE=aarch64-linux-gnu- \
     CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-    # CLANG_TRIPLE=aarch64-linux-gnu- \
     HOSTAR=${ClangPath}/bin/llvm-ar \
     HOSTCC=${ClangPath}/bin/clang \
     HOSTCXX=${ClangPath}/bin/clang++
@@ -88,7 +87,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 	exit 1
    fi
   cd ${KERNEL_ROOTDIR}
-  git clone https://github.com/Tiktodz/AnyKernel3 -b main AnyKernel
+  git clone https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel
   cp $IMAGE AnyKernel/$IMAGE
 }
 # Push kernel to channel
