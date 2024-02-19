@@ -16,7 +16,7 @@ MainPath="$(pwd)"
 # Clone Kernulnya Boys
 git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660 kernel
 # Clone TeeRBeh Clang
-git clone -b 17 https://gitlab.com/varunhardgamer/trb_clang.git clang
+git clone --depth=1 https://gitlab.com/varunhardgamer/trb_clang.git -b 17 --single-branch clang
 
 # ClangPath=${MainClangZipPath}
 ClangPath="${MainPath}/clang"
