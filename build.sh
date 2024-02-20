@@ -89,24 +89,24 @@ make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
   cd ${KERNEL_ROOTDIR}
   git clone https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel
-  cp $IMAGE AnyKernel/$IMAGE
+  cp $IMAGE AnyKernel/
 }
 # Push kernel to channel
 function push() {
-    cd ${KERNEL_ROOTDIR}/AnyKernel
-    ZIPNAME=$(echo *.zip)
-    curl --progress-bar -F document=@"${ZIPNAME}" "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
+    cd AnyKernel
+    ZIP=$(echo *.zip)
+    curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
-        -F "parse_mode=Markdown" \
-        -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For $DEVICE_CODENAME | ${KBUILD_COMPILER_STRING}"
+        -F "parse_mode=html" \
+        -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>$DEVICE_CODENAME</b> | <b>${KBUILD_COMPILER_STRING}</b>"
 }
 # Fin Error
 function finerr() {
     curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
         -d chat_id="$TG_CHAT_ID" \
         -d "disable_web_page_preview=true" \
-        -d "parse_mode=html" \
+        -d "parse_mode=markdown" \
         -d text="I'm tired of compiling kernels,And I choose to give up...please give me motivation"
     exit 1
 }
@@ -114,7 +114,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 "$KERNELNAME"-Kernel-"$DATE" * -x .git README.md .gitignore zipsigner* *.zip
+    zip -r9 [KSU]$KERNELNAME-Kernel-X00TD-4-19-$DATE.zip *
     cd ..
 }
 compile
