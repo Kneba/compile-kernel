@@ -36,7 +36,7 @@ ClangPath="${MainPath}/clang"
 # Prepare
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export TZ=Asia/Jakarta # Change with your local timezone.
-export LD=ld.lld
+export LD="ld.lld"
 export KERNELNAME=TheOneMemory # Change with your localversion name or else.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
@@ -67,7 +67,7 @@ export COMMIT_HEAD=$(git log --oneline -1)
 export LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}"
 
 make -j$(nproc --all) O=out ARCH=arm64 asus/X00TD_defconfig
-make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out LLVM=1 \
+make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out \
     CC=${ClangPath}/bin/clang \
     NM=${ClangPath}/bin/llvm-nm \
     CXX=${ClangPath}/bin/clang++ \
