@@ -72,9 +72,9 @@ make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out \
     NM=${ClangPath}/bin/llvm-nm \
     CXX=${ClangPath}/bin/clang++ \
     AR=${ClangPath}/bin/llvm-ar \
-#   STRIP=${ClangPath}/bin/llvm-strip \
+    STRIP=${ClangPath}/bin/llvm-strip \
     OBJCOPY=${ClangPath}/bin/llvm-objcopy \
-    OBJDUMP=${ClangPath}/bin/llvm-objdump \
+    HOST_PREFIX=${ClangPath}/bin/llvm-objdump \
     OBJSIZE=${ClangPath}/bin/llvm-size \
     READELF=${ClangPath}/bin/llvm-readelf \
     CROSS_COMPILE=aarch64-linux-gnu- \
