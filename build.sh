@@ -14,7 +14,7 @@ MainPath=$(pwd)
 # MainZipGCCbPath="${MainPath}/GCC32-zip"
 
 # Clone Kernulnya Boys
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 kernel
+git clone --depth 1 --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 kernel
 # Clone TeeRBeh Clang
 git clone --depth=1 https://gitlab.com/varunhardgamer/trb_clang.git -b 17 --single-branch clang
 
@@ -114,7 +114,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 "[KSU]$KERNELNAME-Kernel-X00TD-4-19-$DATE.zip" *
+    zip -r9 "[KSU]$KERNELNAME-X00TD-4-19-$DATE.zip" *
     cd ..
 }
 
