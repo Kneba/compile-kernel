@@ -4,7 +4,7 @@
 #
 
 # Main
-MainPath="$(pwd)"
+MainPath=$(pwd)
 # MainClangPath="${MainPath}/clang"
 # MainClangZipPath="${MainPath}/clang-zip"
 # ClangPath="${MainClangZipPath}"
@@ -34,12 +34,12 @@ ClangPath="${MainPath}/clang"
 # tar -xf gcc32.tar.gz -C $GCCbPath
 
 # Prepare
-KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
+KERNEL_ROOTDIR="${MainPath}"/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export TZ=Asia/Jakarta # Change with your local timezone.
 export LD="ld.lld"
 export KERNELNAME=TheOneMemory # Change with your localversion name or else.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
-IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
+IMAGE="${KERNEL_ROOTDIR}"/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 #LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER"
@@ -50,13 +50,13 @@ export PATH="${ClangPath}"/bin:${PATH}
 
 # Telegram
 export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
+export BOT_BUILD_URL="https://api.telegram.org/bot$TG_TOKEN/sendDocument"
 
 tg_post_msg() {
   curl -s -X POST "$BOT_MSG_URL" -d chat_id="$TG_CHAT_ID" \
   -d "disable_web_page_preview=true" \
   -d "parse_mode=html" \
   -d text="$1"
-
 }
 
 # Compile
@@ -89,17 +89,17 @@ make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
   cd ${KERNEL_ROOTDIR}
   git clone https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel
-  cp $IMAGE AnyKernel/
+  cp -af "$IMAGE" AnyKernel/Image.gz-dtb
 }
 # Push kernel to channel
 function push() {
     cd AnyKernel
     ZIP=$(echo *.zip)
-    curl -F document=@"$ZIP" "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
+    curl -F document=@"$ZIP" "$BOT_BUILD_URL" \
         -F chat_id="$TG_CHAT_ID" \
         -F "disable_web_page_preview=true" \
-        -F "parse_mode=html" \
-        -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>$DEVICE_CODENAME</b> | <b>${KBUILD_COMPILER_STRING}</b>"
+        -F "parse_mode=Markdown" \
+        -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For *${DEVICE_CODENAME}* | *${KBUILD_COMPILER_STRING}*"
 }
 # Fin Error
 function finerr() {
@@ -114,9 +114,11 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [KSU]$KERNELNAME-Kernel-X00TD-4-19-$DATE.zip *
+    zip -r9 "[KSU]$KERNELNAME-Kernel-X00TD-4-19-$DATE.zip" *
     cd ..
 }
+
+tg_post_msg "</b>Warning!!</b>%0AStart Building ${KERNELNAME} for ${DEVICE_CODENAME}"
 compile
 zipping
 END=$(date +"%s")
