@@ -50,8 +50,8 @@ KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root dir
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
+#LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
+export KBUILD_COMPILER_STRING="$CLANG_VER"
 export TZ=Asia/Jakarta # Change with your local timezone.
 DATE=$(date +"%Y%m%d"-%H%M)
 START=$(date +"%s")
@@ -60,6 +60,9 @@ export PATH="${ClangPath}"/bin:${PATH}
 
 # Java
 command -v java > /dev/null 2>&1
+
+# Speed up build process
+MAKE="./makeparallel"
 
 # Telegram
 export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
@@ -83,7 +86,6 @@ make -j$(nproc --all) O=out ARCH=arm64 X00TD_defconfig
 make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out LLVM=1 \
        AS="${ClangPath}/bin/llvm-as" \
        CC="${ClangPath}/bin/clang" \
-       LD="${ClangPath}/bin/ld.lld" \
        AR="${ClangPath}/bin/llvm-ar" \
        NM="${ClangPath}/bin/llvm-nm" \
        STRIP="${ClangPath}/bin/llvm-strip" \
