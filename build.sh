@@ -51,6 +51,7 @@ export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 #LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
+ClangMoreStrings="AR=llvm-ar NM=llvm-nm AS=llvm-as STRIP=llvm-strip HOST_PREFIX=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf HOSTAR=llvm-ar HOSTAS=llvm-as"
 export KBUILD_COMPILER_STRING="$CLANG_VER"
 export TZ=Asia/Jakarta # Change with your local timezone.
 DATE=$(date +"%Y%m%d"-%H%M)
@@ -80,21 +81,16 @@ compile(){
 cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-export LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}"
+LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}"
+LD=ld.lld
+HOSTLD=ld.lld
 
 make -j$(nproc --all) O=out ARCH=arm64 X00TD_defconfig
-make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out LLVM=1 \
-       AS="${ClangPath}/bin/llvm-as" \
-       CC="${ClangPath}/bin/clang" \
-       AR="${ClangPath}/bin/llvm-ar" \
-       NM="${ClangPath}/bin/llvm-nm" \
-       STRIP="${ClangPath}/bin/llvm-strip" \
-       OBJCOPY="${ClangPath}/bin/llvm-objcopy" \
-       OBJDUMP="${ClangPath}/bin/llvm-objdump" \
-       CLANG_TRIPLE=aarch64-linux-gnu- \
-       CROSS_COMPILE="${ClangPath}/bin/clang" \
-       CROSS_COMPILE_COMPAT="${ClangPath}/bin/clang" \
-       CROSS_COMPILE_ARM32="${ClangPath}/bin/clang"
+make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out \
+		      CLANG_TRIPLE=aarch64-linux-gnu- \
+		      CC=clang \
+		      HOSTCC=clang \
+		      HOSTCXX=clang++ ${ClangMoreStrings}
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
