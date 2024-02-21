@@ -35,10 +35,10 @@ VERSION=CLO
 MANUFACTURERINFO="ASUSTek Computer Inc."
 DEVICE_CODENAME="X00TD"
 
-# Clone Kernel Source
+   msg "|| Cloning Kernel Source ||"
 git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b tom kernel
 
-# Clone TheRagingBeast Clang
+   msg "|| Cloning TheRagingBeast Clang ||"
 git clone --depth=1 https://gitlab.com/varunhardgamer/trb_clang.git -b 17 --single-branch clang
 
 # Clang Path
@@ -47,16 +47,16 @@ ClangPath="${MainPath}/clang"
 
 # Prepare
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
-export LD="ld.lld"
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
 export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
-export PATH="${ClangPath}"/bin:${PATH}
 export TZ=Asia/Jakarta # Change with your local timezone.
 DATE=$(date +"%Y%m%d"-%H%M)
 START=$(date +"%s")
+export LD="ld.lld"
+export PATH="${ClangPath}"/bin:${PATH}
 
 # Java
 command -v java > /dev/null 2>&1
@@ -78,6 +78,7 @@ cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
 export LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}"
+
 make -j$(nproc --all) O=out ARCH=arm64 X00TD_defconfig
 make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out \
     CC=${ClangPath}/bin/clang \
