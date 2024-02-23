@@ -54,6 +54,7 @@ fi
 fi
 
 ## Copy this script inside the kernel directory
+KERNEL=$KERNEL/kernel/
 KERNEL_DEFCONFIG=asus/X00TD_defconfig
 ANYKERNEL3_DIR=$KERNELDIR/AnyKernel3/
 TZ=Asia/Jakarta
@@ -84,7 +85,7 @@ command -v java > /dev/null 2>&1
 # echo "**** Cleaning ****"
 # rm -rf TheOneMemory*.zip
 mkdir -p out
-make O=out clean
+make O=out clean && make O=out mrproper
 
 echo -e "**** Kernel defconfig is set to $KERNEL_DEFCONFIG ****"
 echo -e "$blue***********************************************"
@@ -93,23 +94,23 @@ echo -e "$red***********************************************"
 make $KERNEL_DEFCONFIG O=out
 make -j$(nproc --all) O=out LLVM=1\
 		ARCH=arm64 \
-		AS="$KERNELDIR/trb_clang/bin/llvm-as" \
-		CC="$KERNELDIR/trb_clang/bin/clang" \
-		LD="$KERNELDIR/trb_clang/bin/ld.lld" \
-		AR="$KERNELDIR/trb_clang/bin/llvm-ar" \
-		NM="$KERNELDIR/trb_clang/bin/llvm-nm" \
-		STRIP="$KERNELDIR/trb_clang/bin/llvm-strip" \
-		OBJCOPY="$KERNELDIR/trb_clang/bin/llvm-objcopy" \
-		OBJDUMP="$KERNELDIR/trb_clang/bin/llvm-objdump" \
+		AS="$KERNEL/trb_clang/bin/llvm-as" \
+		CC="$KERNEL/trb_clang/bin/clang" \
+		LD="$KERNEL/trb_clang/bin/ld.lld" \
+		AR="$KERNEL/trb_clang/bin/llvm-ar" \
+		NM="$KERNEL/trb_clang/bin/llvm-nm" \
+		STRIP="$KERNEL/trb_clang/bin/llvm-strip" \
+		OBJCOPY="$KERNEL/trb_clang/bin/llvm-objcopy" \
+		OBJDUMP="$KERNEL/trb_clang/bin/llvm-objdump" \
 		CLANG_TRIPLE=aarch64-linux-gnu- \
-		CROSS_COMPILE="$KERNELDIR/trb_clang/bin/clang" \
-		CROSS_COMPILE_COMPAT="$KERNELDIR/trb_clang/bin/clang" \
-		CROSS_COMPILE_ARM32="$KERNELDIR/trb_clang/bin/clang"
+		CROSS_COMPILE="$KERNEL/trb_clang/bin/clang" \
+		CROSS_COMPILE_COMPAT="$KERNEL/trb_clang/bin/clang" \
+		CROSS_COMPILE_ARM32="$KERNEL/trb_clang/bin/clang"
 
 echo -e "$blue**** Kernel Compilation Completed ****"
 echo -e "$cyan**** Verify Image.gz-dtb ****"
 
-if ! [ -f $KERNELDIR/out/arch/arm64/boot/Image.gz-dtb ];then
+if ! [ -f $KERNEL/out/arch/arm64/boot/Image.gz-dtb ];then
     echo -e "$red Compile Failed!!!$nocol"
     exit 1
 fi
@@ -125,7 +126,7 @@ ls $ANYKERNEL3_DIR
 echo -e "$red <b><#selectbg_g>$(date)</#></b>"&& echo " " && git log --oneline -n15 | cut -d " " -f 2- | awk '{print "<*> " $(A)}' >> changelog
 
 echo -e "****$nocol Copying Image.gz-dtb ****"
-cp $KERNELDIR/out/arch/arm64/boot/Image.gz-dtb $ANYKERNEL3_DIR/
+cp $KERNEL/out/arch/arm64/boot/Image.gz-dtb $ANYKERNEL3_DIR/
 
 echo "$cyan**** Time to zip up! ****"
 cd $ANYKERNEL3_DIR/
