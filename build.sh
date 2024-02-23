@@ -3,114 +3,152 @@
 # Copyright (C) 2022 - 2024 <abenkenary3@gmail.com>
 #
 
-# Main
-MainPath="$(pwd)"
-MainClangPath="${MainPath}/clang"
-MainClangZipPath="${MainPath}/clang-zip"
-ClangPath="${MainClangZipPath}"
-GCCaPath="${MainPath}/GCC64"
-GCCbPath="${MainPath}/GCC32"
-MainZipGCCaPath="${MainPath}/GCC64-zip"
-MainZipGCCbPath="${MainPath}/GCC32-zip"
+#set -e
 
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 kernel
+KERNELDIR=$(pwd)
 
-ClangPath=${MainClangZipPath}
-[[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
-mkdir $ClangPath
-rm -rf $ClangPath/*
-wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz -O "clang-r487747c.tar.gz"
-tar -xf clang-r487747c.tar.gz -C $ClangPath
+# Identity
+CODENAME=Hayzel
+KERNELNAME=TheOneMemory
+VARIANT=EAS
+VERSION=4-19
 
-mkdir $GCCaPath
-mkdir $GCCbPath
-wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz -O "gcc64.tar.gz"
-tar -xf gcc64.tar.gz -C $GCCaPath
-wget -q https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz -O "gcc32.tar.gz"
-tar -xf gcc32.tar.gz -C $GCCbPath
+TG_SUPER=1
+BOT_BUILD_URL="https://api.telegram.org/bot$TG_TOKEN/sendDocument"
 
-# Prepare
-KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
-export TZ=Asia/Jakarta # Change with your local timezone.
-export LD=ld.lld
-export KERNELNAME=TheOneMemory-Kernel-4-19-X00TD # Change with your localversion name or else.
-export KBUILD_BUILD_USER=queen # Change with your own name or else.
-IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
-CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-#LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
-export KBUILD_COMPILER_STRING="$CLANG_VER"
-DATE=$(TZ=Asia/Jakarta date +"%Y%m%d-%H%M")
-START=$(date +"%s")
-PATH=${ClangPath}/bin:${GCCaPath}/bin:${GCCbPath}/bin:${PATH}
-
-# Telegram
-export BOT_MSG_URL="https://api.telegram.org/bot$TG_TOKEN/sendMessage"
-
-tg_post_msg() {
-  curl -s -X POST "$BOT_MSG_URL" -d chat_id="$TG_CHAT_ID" \
-  -d "disable_web_page_preview=true" \
-  -d "parse_mode=html" \
-  -d text="$1"
-
+tg_post_build()
+{
+	if [ $TG_SUPER = 1 ]
+	then
+	    curl -F document=@"$1" "$BOT_BUILD_URL" \
+	    -F chat_id="$TG_CHAT_ID"  \
+	    -F "disable_web_page_preview=true" \
+	    -F "parse_mode=Markdown" \
+	    -F caption="$2"
+	else
+	    curl -F document=@"$1" "$BOT_BUILD_URL" \
+	    -F chat_id="$TG_CHAT_ID"  \
+	    -F "disable_web_page_preview=true" \
+	    -F "parse_mode=Markdown" \
+	    -F caption="$2"
+	fi
 }
 
-# Compile
-compile(){
-cd ${KERNEL_ROOTDIR}
-export HASH_HEAD=$(git rev-parse --short HEAD)
-export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig
-make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
-    LD_LIBRARY_PATH="${ClangPath}/lib64:${LD_LIBRARY_PATH}" \
-    CC=${ClangPath}/bin/clang \
-    NM=${ClangPath}/bin/llvm-nm \
-    CXX=${ClangPath}/bin/clang++ \
-    AR=${ClangPath}/bin/llvm-ar \
-    STRIP=${ClangPath}/bin/llvm-strip \
-    OBJCOPY=${ClangPath}/bin/llvm-objcopy \
-    OBJDUMP=${ClangPath}/bin/llvm-objdump \
-    OBJSIZE=${ClangPath}/bin/llvm-size \
-    READELF=${ClangPath}/bin/llvm-readelf \
-    CROSS_COMPILE=aarch64-linux-android- \
-    CROSS_COMPILE_ARM32=arm-linux-androideabi- \
-    CLANG_TRIPLE=aarch64-linux-gnu- \
-    HOSTAR=${ClangPath}/bin/llvm-ar \
-    HOSTCC=${ClangPath}/bin/clang \
-    HOSTCXX=${ClangPath}/bin/clang++
+if ! [ -d "$KERNELDIR/trb_clang" ]; then
+if ! git clone https://gitlab.com/varunhardgamer/trb_clang --depth=1 -b 17 --single-branch trb_clang; then
+exit 1
+fi
+fi
 
-   if ! [ -a "$IMAGE" ]; then
-	finerr
-	exit 1
-   fi
-  git clone https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel
-	cp $IMAGE AnyKernel
-}
-# Push kernel to channel
-function push() {
-    cd AnyKernel
-    ZIP=$(echo *.zip)
-    curl -F document=@$ZIP "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
-        -F chat_id="$TG_CHAT_ID" \
-        -F "disable_web_page_preview=true" \
-        -F "parse_mode=html" \
-        -F caption="Compile took $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second(s). | For <b>$DEVICE_CODENAME</b> | <b>${KBUILD_COMPILER_STRING}</b>"
-}
-# Fin Error
-function finerr() {
-    curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
-        -d chat_id="$TG_CHAT_ID" \
-        -d "disable_web_page_preview=true" \
-        -d "parse_mode=markdown" \
-        -d text="I'm tired of compiling kernels,And I choose to give up...please give me motivation"
+if ! [ -d "$KERNELDIR/AnyKernel3" ]; then
+echo -e "AnyKernel3 not found! Cloning..."
+if ! git clone --depth=1 https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel3; then
+exit 1
+fi
+fi
+
+## Copy this script inside the kernel directory
+KERNEL_DEFCONFIG=asus/X00TD_defconfig
+ANYKERNEL3_DIR=$KERNELDIR/AnyKernel3/
+TZ=Asia/Jakarta
+DATE=$(date '+%Y%m%d')
+FINAL_KERNEL_ZIP="$KERNELNAME-$VARIANT-$VERSION-$(date '+%Y%m%d-%H%M')"
+KERVER=$(make kernelversion)
+export PATH="$KERNELDIR/trb_clang/bin:$PATH"
+export ARCH=arm64
+export SUBARCH=arm64
+export KBUILD_BUILD_USER="queen"
+export KBUILD_BUILD_HOST=$(source /etc/os-release && echo "${NAME}")
+export KBUILD_COMPILER_STRING="$($KERNELDIR/trb_clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
+
+# Speed up build process
+MAKE="./makeparallel"
+
+BUILD_START=$(date +"%s")
+blue='\033[0;34m'
+cyan='\033[0;36m'
+yellow='\033[0;33m'
+red='\033[0;31m'
+nocol='\033[0m'
+
+# Java
+command -v java > /dev/null 2>&1
+
+# Clean build always lol
+# echo "**** Cleaning ****"
+# rm -rf TheOneMemory*.zip
+mkdir -p out
+make O=out clean
+
+echo -e "**** Kernel defconfig is set to $KERNEL_DEFCONFIG ****"
+echo -e "$blue***********************************************"
+echo -e "          BUILDING KERNEL          "
+echo -e "$red***********************************************"
+make $KERNEL_DEFCONFIG O=out
+make -j$(nproc --all) O=out LLVM=1\
+		ARCH=arm64 \
+		AS="$KERNELDIR/trb_clang/bin/llvm-as" \
+		CC="$KERNELDIR/trb_clang/bin/clang" \
+		LD="$KERNELDIR/trb_clang/bin/ld.lld" \
+		AR="$KERNELDIR/trb_clang/bin/llvm-ar" \
+		NM="$KERNELDIR/trb_clang/bin/llvm-nm" \
+		STRIP="$KERNELDIR/trb_clang/bin/llvm-strip" \
+		OBJCOPY="$KERNELDIR/trb_clang/bin/llvm-objcopy" \
+		OBJDUMP="$KERNELDIR/trb_clang/bin/llvm-objdump" \
+		CLANG_TRIPLE=aarch64-linux-gnu- \
+		CROSS_COMPILE="$KERNELDIR/trb_clang/bin/clang" \
+		CROSS_COMPILE_COMPAT="$KERNELDIR/trb_clang/bin/clang" \
+		CROSS_COMPILE_ARM32="$KERNELDIR/trb_clang/bin/clang"
+
+echo -e "$blue**** Kernel Compilation Completed ****"
+echo -e "$cyan**** Verify Image.gz-dtb ****"
+
+if ! [ -f $KERNELDIR/out/arch/arm64/boot/Image.gz-dtb ];then
+    echo -e "$red Compile Failed!!!$nocol"
     exit 1
-}
+fi
 
-# Zipping
-function zipping() {
-    cd AnyKernel || exit 1
-    zip -r9 [KSU]$KERNELNAME-$DATE.zip *
-    cd ..
-}
+# Anykernel 3 time!!
+echo -e "$yellow**** Verifying AnyKernel3 Directory ****"
+ls $ANYKERNEL3_DIR
+# echo "**** Removing leftovers ****"
+# rm -rf $ANYKERNEL3_DIR/Image.gz-dtb
+# rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
+
+# Generating Changelog
+echo -e "$red <b><#selectbg_g>$(date)</#></b>"&& echo " " && git log --oneline -n15 | cut -d " " -f 2- | awk '{print "<*> " $(A)}' >> changelog
+
+echo -e "****$nocol Copying Image.gz-dtb ****"
+cp $KERNELDIR/out/arch/arm64/boot/Image.gz-dtb $ANYKERNEL3_DIR/
+
+echo "$cyan**** Time to zip up! ****"
+cd $ANYKERNEL3_DIR/
+
+zip -r9 "../$FINAL_KERNEL_ZIP" * -x .git README.md .gitignore zipsigner* "*.zip"
+
+ZIP_FINAL="$FINAL_KERNEL_ZIP"
+
+echo -e "$red**** Done, here is your sha1 ****"
+
+cd ..
+
+sha1sum $FINAL_KERNEL_ZIP
+
+echo -e "$cyan*** Zip signature ***"
+curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
+java -jar zipsigner-3.0.jar "$ZIP_FINAL".zip "$ZIP_FINAL"-signed.zip
+ZIP_FINAL="$ZIP_FINAL-signed"
+
+#rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
+#rm -rf $ANYKERNEL3_DIR/Image.gz-dtb
+#rm -rf out/*
+
+BUILD_END=$(date +"%s")
+DIFF=$(($BUILD_END - $BUILD_START))
+echo -e "$cyan Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.$nocol"
+
+echo -e "$cyan**** Uploading your zip now ****"
+tg_post_build "$ZIP_FINAL.zip" "Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds"
 compile
 zipping
 END=$(date +"%s")
