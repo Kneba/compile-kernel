@@ -36,18 +36,10 @@ tg_post_build()
 	fi
 }
 
-if ! [ -d "$KERNELDIR/trb_clang" ]; then
-if ! git clone https://gitlab.com/varunhardgamer/trb_clang --depth=1 -b 17 --single-branch trb_clang; then
-exit 1
-fi
-fi
+git clone https://gitlab.com/varunhardgamer/trb_clang --depth=1 -b 17 --single-branch trb_clang
 
-if ! [ -d "$KERNELDIR/AnyKernel3" ]; then
 echo -e "AnyKernel3 not found! Cloning..."
-if ! git clone --depth=1 https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel3; then
-exit 1
-fi
-fi
+git clone --depth=1 https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel3
 
 ## Copy this script inside the kernel directory
 KERNEL=$KERNEL/kernel/
@@ -81,7 +73,7 @@ command -v java > /dev/null 2>&1
 # echo "**** Cleaning ****"
 # rm -rf TheOneMemory*.zip
 mkdir -p out
-make O=out clean && make O=out mrproper
+#make O=out clean && make O=out mrproper
 
 echo -e "**** Kernel defconfig is set to $KERNEL_DEFCONFIG ****"
 echo -e "$blue***********************************************"
