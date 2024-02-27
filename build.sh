@@ -29,14 +29,11 @@ MainPath=$(pwd)
 CODENAME=Hayzel
 KERNELNAME=TheOneMemory
 VARIANT=HMP
-VERSION=CLO
+VERSION=EOL
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 DEVICE_CODENAME="X00TD"
-
-   msg "|| Cloning Kernel Source ||"
-git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b stock kernel
 
    msg "|| Cloning TheRagingBeast Clang ||"
 git clone --depth=1 https://gitlab.com/varunhardgamer/trb_clang.git -b 17 --single-branch clang
@@ -56,8 +53,6 @@ export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
 export TZ=Asia/Jakarta # Change with your local timezone.
 DATE=$(date +"%Y%m%d"-%H%M)
 START=$(date +"%s")
-#export LD="ld.lld"
-#export PATH="${ClangPath}"/bin:${PATH}
 
 # Java
 command -v java > /dev/null 2>&1
@@ -79,6 +74,7 @@ tg_post_msg() {
 # Compile
 compile(){
 cd ${KERNEL_ROOTDIR}
+KERVER=$(make kernelversion)
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
 LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}"
