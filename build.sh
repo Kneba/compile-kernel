@@ -36,7 +36,7 @@ MANUFACTURERINFO="ASUSTek Computer Inc."
 DEVICE_CODENAME="X00TD"
 
    msg "|| Cloning Kernel Source ||"
-git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b tom kernel
+git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b stock kernel
 
    msg "|| Cloning TheRagingBeast Clang ||"
 git clone --depth=1 https://gitlab.com/varunhardgamer/trb_clang.git -b 17 --single-branch clang
@@ -50,14 +50,14 @@ KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root dir
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
-#LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
+LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
 ClangMoreStrings="AR=llvm-ar NM=llvm-nm AS=llvm-as STRIP=llvm-strip HOST_PREFIX=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf HOSTAR=llvm-ar HOSTAS=llvm-as"
-export KBUILD_COMPILER_STRING="$CLANG_VER"
+export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
 export TZ=Asia/Jakarta # Change with your local timezone.
 DATE=$(date +"%Y%m%d"-%H%M)
 START=$(date +"%s")
 #export LD="ld.lld"
-export PATH="${ClangPath}"/bin:${PATH}
+#export PATH="${ClangPath}"/bin:${PATH}
 
 # Java
 command -v java > /dev/null 2>&1
@@ -82,14 +82,15 @@ cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
 LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}"
-LD=ld.lld
-HOSTLD=ld.lld
 
 make -j$(nproc --all) O=out ARCH=arm64 X00TD_defconfig
 make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out \
+		      PATH="${ClangPath}"/bin:${PATH} \
 		      CLANG_TRIPLE=aarch64-linux-gnu- \
 		      CC=clang \
 		      HOSTCC=clang \
+		      LD=ld.lld
+		      HOSTLD=ld.lld
 		      HOSTCXX=clang++ ${ClangMoreStrings}
 
    if ! [ -a "$IMAGE" ]; then
