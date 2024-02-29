@@ -35,8 +35,14 @@ VERSION=EOL
 MANUFACTURERINFO="ASUSTek Computer Inc."
 DEVICE_CODENAME="X00TD"
 
-   msg "|| Cloning TheRagingBeast Clang ||"
-git clone --depth=1 https://gitlab.com/varunhardgamer/trb_clang.git -b 17 --single-branch clang
+   msg "|| Cloning Neutron Clang ||"
+   mkdir clang
+    curl -s https://api.github.com/repos/Neutron-Toolchains/clang-build-catalogue/releases/latest \
+    | grep "browser_download_url.*tar.zst" \
+    | cut -d : -f 2,3 \
+    | tr -d \" \
+    | wget --output-document=Neutron.tar.zst -qi -
+    tar -xvf Neutron.tar.zst -C clang/
 
 # Clang Path
 ClangPath="${MainPath}/clang"
@@ -53,6 +59,7 @@ export KBUILD_COMPILER_STRING="$CLANG_VER with $LLD_VER"
 export TZ=Asia/Jakarta # Change with your local timezone.
 DATE=$(date +"%Y%m%d"-%H%M)
 START=$(date +"%s")
+KERVER=$(make kernelversion)
 
 # Java
 command -v java > /dev/null 2>&1
@@ -74,20 +81,25 @@ tg_post_msg() {
 # Compile
 compile(){
 cd ${KERNEL_ROOTDIR}
-KERVER=$(make kernelversion)
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
 LD_LIBRARY_PATH="${ClangPath}/lib:${LD_LIBRARY_PATH}"
 
 make -j$(nproc --all) O=out ARCH=arm64 X00TD_defconfig
-make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out \
-		      PATH="${ClangPath}"/bin:${PATH} \
-		      CLANG_TRIPLE=aarch64-linux-gnu- \
-		      CC=clang \
-		      HOSTCC=clang \
-		      LD=ld.lld
-		      HOSTLD=ld.lld
-		      HOSTCXX=clang++ ${ClangMoreStrings}
+make -j$(nproc --all) ARCH=arm64 SUBARCH=arm64 O=out LLVM=1 \
+		ARCH=arm64 \
+		AS="$ClangPath/bin/llvm-as" \
+		CC="$ClangPath/bin/clang" \
+		LD="$ClangPath/bin/ld.lld" \
+		AR="$ClangPath/bin/llvm-ar" \
+		NM="$ClangPath/bin/llvm-nm" \
+		STRIP="$ClangPath/bin/llvm-strip" \
+		OBJCOPY="$ClangPath/bin/llvm-objcopy" \
+		OBJDUMP="$ClangPath/bin/llvm-objdump" \
+		CLANG_TRIPLE=aarch64-linux-gnu- \
+		CROSS_COMPILE="$ClangPath/bin/clang" \
+		CROSS_COMPILE_COMPAT="$ClangPath/tbin/clang" \
+		CROSS_COMPILE_ARM32="$ClangPath/bin/clang"
 
    if ! [ -a "$IMAGE" ]; then
 	finerr
