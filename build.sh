@@ -11,12 +11,19 @@ KERNELDIR=$(pwd)
 CODENAME=Hayzel
 KERNELNAME=TheOneMemory
 VARIANT=EAS
-VERSION=4-19
+VERSION=v4-19
 
 TG_SUPER=1
 BOT_BUILD_URL="https://api.telegram.org/bot$TG_TOKEN/sendDocument"
 
-git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 kernel
+BUILD_START=$(date +"%s")
+blue='\033[0;34m'
+cyan='\033[0;36m'
+yellow='\033[0;33m'
+red='\033[0;31m'
+nocol='\033[0m'
+
+git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660 -b tom/q kernel
 
 tg_post_build()
 {
@@ -42,12 +49,13 @@ echo -e "AnyKernel3 not found! Cloning..."
 git clone --depth=1 https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel3
 
 ## Copy this script inside the kernel directory
-KERNEL=$KERNEL/kernel/
+KERNEL=$KERNELDIR/kernel
 KERNEL_DEFCONFIG=asus/X00TD_defconfig
-ANYKERNEL3_DIR=$KERNELDIR/AnyKernel3/
+ANYKERNEL3_DIR=$KERNELDIR/AnyKernel3
+TCDIR=$KERNELDIR/trb_clang
 TZ=Asia/Jakarta
 DATE=$(date '+%Y%m%d')
-FINAL_KERNEL_ZIP="$KERNELNAME-$VARIANT-$VERSION-$(date '+%Y%m%d-%H%M')"
+FINAL_KERNEL_ZIP="$KERNELNAME-Kernel-$VERSION-$(date '+%Y%m%d-%H%M')"
 KERVER=$(make kernelversion)
 export PATH="$KERNELDIR/trb_clang/bin:$PATH"
 export ARCH=arm64
@@ -59,13 +67,6 @@ export KBUILD_COMPILER_STRING="$($KERNELDIR/trb_clang/bin/clang --version | head
 # Speed up build process
 MAKE="./makeparallel"
 
-BUILD_START=$(date +"%s")
-blue='\033[0;34m'
-cyan='\033[0;36m'
-yellow='\033[0;33m'
-red='\033[0;31m'
-nocol='\033[0m'
-
 # Java
 command -v java > /dev/null 2>&1
 
@@ -73,27 +74,29 @@ command -v java > /dev/null 2>&1
 # echo "**** Cleaning ****"
 # rm -rf TheOneMemory*.zip
 mkdir -p out
-#make O=out clean && make O=out mrproper
+make O=out clean
 
 echo -e "**** Kernel defconfig is set to $KERNEL_DEFCONFIG ****"
 echo -e "$blue***********************************************"
 echo -e "          BUILDING KERNEL          "
 echo -e "$red***********************************************"
+cd $KERNEL
 make $KERNEL_DEFCONFIG O=out
-make -j$(nproc --all) O=out LLVM=1\
+make -j$(nproc --all) O=out \
 		ARCH=arm64 \
-		AS="$KERNEL/trb_clang/bin/llvm-as" \
-		CC="$KERNEL/trb_clang/bin/clang" \
-		LD="$KERNEL/trb_clang/bin/ld.lld" \
-		AR="$KERNEL/trb_clang/bin/llvm-ar" \
-		NM="$KERNEL/trb_clang/bin/llvm-nm" \
-		STRIP="$KERNEL/trb_clang/bin/llvm-strip" \
-		OBJCOPY="$KERNEL/trb_clang/bin/llvm-objcopy" \
-		OBJDUMP="$KERNEL/trb_clang/bin/llvm-objdump" \
+		SUBARCH=arm64 \
+		AS="$TCDIR/bin/llvm-as" \
+		CC="$TCDIR/bin/clang" \
+		LD="$TCDIR/bin/ld.lld" \
+		AR="$TCDIR/bin/llvm-ar" \
+		NM="$TCDIR/bin/llvm-nm" \
+		STRIP="$TCDIR/bin/llvm-strip" \
+		OBJCOPY="$TCDIR/bin/llvm-objcopy" \
+		OBJDUMP="$TCDIR/bin/llvm-objdump" \
 		CLANG_TRIPLE=aarch64-linux-gnu- \
-		CROSS_COMPILE="$KERNEL/trb_clang/bin/clang" \
-		CROSS_COMPILE_COMPAT="$KERNEL/trb_clang/bin/clang" \
-		CROSS_COMPILE_ARM32="$KERNEL/trb_clang/bin/clang"
+		CROSS_COMPILE="$TCDIR/bin/clang" \
+		CROSS_COMPILE_COMPAT="$TCDIR/bin/clang" \
+		CROSS_COMPILE_ARM32="$TCDIR/bin/clang"
 
 echo -e "$blue**** Kernel Compilation Completed ****"
 echo -e "$cyan**** Verify Image.gz-dtb ****"
