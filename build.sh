@@ -32,16 +32,16 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-CODENAME=Hayzel
-KERNELNAME=TheOneMemory
+CODENAME=Onyx
+KERNELNAME=TOM
 VARIANT=HMP
-VERSION=CLO
+VERSION=EOL
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm636 kernel
+git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Tiktodz/kernel_asus_sdm660 -b perf kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
@@ -62,6 +62,7 @@ git clone --depth=1 https://github.com/Kneba/arm-linux-androideabi-4.9 $GCCbPath
 # Prepared
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
+export KBUILD_BUILD_HOST=fedora-rawhide # Change with your host name.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="Snapdragon clang version 14.1.5"
 #LLD_VER="$("$ClangPath"/bin/ld.lld --version | head -n 1)"
@@ -106,7 +107,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone https://github.com/Tiktodz/AnyKernel3 -b hmp AnyKernel
+   git clone https://github.com/Kneba/AnyKernel3 -b hmp AnyKernel
    cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
@@ -173,9 +174,9 @@ function zipping() {
 	sed -i "s/KVARIANT/$VARIANT/g" aroma-config
 	cd ../../../..
 
-	zip -r9 $KERNELNAME-$CODENAME-$VARIANT-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* "*.zip"
+	zip -r9 $KERNELNAME-$VARIANT-$VERSION-"$DATE" * -x .git README.md anykernel-real.sh .gitignore zipsigner* "*.zip"
 
-	ZIP_FINAL="$KERNELNAME-$CODENAME-$VARIANT-$DATE"
+	ZIP_FINAL="$KERNELNAME-$VARIANT-$VERSION-$DATE"
 
 	msg "|| Signing Zip ||"
 	tg_post_msg "<code>🔑 Signing Zip file with AOSP keys..</code>"
