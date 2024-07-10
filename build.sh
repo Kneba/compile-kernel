@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2023 Kneba <abenkenary3@gmail.com>
+# Copyright (C) 2023-2024 Kneba <abenkenary3@gmail.com>
 #
 
 #
@@ -36,6 +36,7 @@ CODENAME=Onyx
 KERNELNAME=TOM
 VARIANT=HMP
 VERSION=EOL
+KVERSION=4.4.302
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
@@ -69,7 +70,8 @@ CLANG_VER="Snapdragon clang version 14.1.5"
 export KBUILD_COMPILER_STRING="$CLANG_VER X GCC 4.9"
 ClangMoreStrings="AR=llvm-ar NM=llvm-nm AS=llvm-as STRIP=llvm-strip OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump READELF=llvm-readelf HOSTAR=llvm-ar HOSTAS=llvm-as LD_LIBRARY_PATH=$ClangPath/lib LD=ld.lld HOSTLD=ld.lld"
 export TZ=Asia/Jakarta
-DATE=$(date +"%Y%m%d"-%H%M)
+DATE=$(date +"%Y%m%d")
+DATE2=$(date +"%Y%m%d"-%H%M)
 START=$(date +"%s")
 
 # Java
@@ -107,7 +109,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
    fi
 
    msg "|| Cloning AnyKernel ||"
-   git clone https://github.com/Kneba/AnyKernel3 -b hmp AnyKernel
+   git clone https://github.com/Tiktodz/AnyKernel3 -b hmp-old AnyKernel
    cp $IMAGE AnyKernel
 }
 # Push kernel to telegram
@@ -154,7 +156,7 @@ function zipping() {
 	sed -i "s/kernel.for=.*/kernel.for=$CODENAME/g" anykernel.sh
 	sed -i "s/kernel.compiler=.*/kernel.compiler=$KBUILD_COMPILER_STRING/g" anykernel.sh
 	sed -i "s/kernel.made=.*/kernel.made=dotkit @fakedotkit/g" anykernel.sh
-	sed -i "s/kernel.version=.*/kernel.version=$VERSION/g" anykernel.sh
+	sed -i "s/kernel.version=.*/kernel.version=$KVERSION/g" anykernel.sh
 	sed -i "s/message.word=.*/message.word=Appreciate your efforts for choosing TheOneMemory kernel./g" anykernel.sh
 	sed -i "s/build.date=.*/build.date=$DATE/g" anykernel.sh
 	sed -i "s/build.type=.*/build.type=$VERSION/g" anykernel.sh
@@ -167,7 +169,7 @@ function zipping() {
 	sed -i "s/X00TD=.*/X00TD=1/g" anykernel.sh
 	cd META-INF/com/google/android
 	sed -i "s/KNAME/$KERNELNAME/g" aroma-config
-	sed -i "s/KVER/$KERVER/g" aroma-config
+	sed -i "s/KVER/$KVERSION/g" aroma-config
 	sed -i "s/KAUTHOR/dotkit @fakedotkit/g" aroma-config
 	sed -i "s/KDEVICE/Zenfone Max Pro M1/g" aroma-config
 	sed -i "s/KBDATE/$DATE/g" aroma-config
