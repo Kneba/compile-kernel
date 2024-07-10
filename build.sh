@@ -42,7 +42,7 @@ KVERSION=4.4.302
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b perf kernel
+git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b perf kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
