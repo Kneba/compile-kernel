@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #
 # Copyright (C) 2023-2024 Kneba <abenkenary3@gmail.com>
 #
