@@ -33,17 +33,17 @@ GCCaPath="${MainGCCaPath}"
 GCCbPath="${MainGCCbPath}"
 
 # Identity
-CODENAME=Onyx
+CODENAME=Hayzel
 KERNELNAME=TOM
 VARIANT=HMP
-VERSION=EOL
-KVERSION=4.4.302
+VERSION=CLO
+KVERSION=4.4.205
 
 # Show manufacturer info
 MANUFACTURERINFO="ASUSTek Computer Inc."
 
 # Clone Kernel Source
-git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/Kneba/kernel_asus_sdm660 -b perf kernel
+git clone --depth=1 --recursive https://$USERNAME:$TOKEN@github.com/texascake/kernel_asus_sdm660 kernel
 
 # Clone Snapdragon Clang
 ClangPath=${MainClangPath}
