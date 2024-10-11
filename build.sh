@@ -13,7 +13,7 @@ GCCbPath="${MainPath}/GCC32"
 MainZipGCCaPath="${MainPath}/GCC64-zip"
 MainZipGCCbPath="${MainPath}/GCC32-zip"
 
-git clone --recursive https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660-4.19 kernel
+git clone --depth=1 https://$USERNAME:$TOKEN@github.com/Tiktodz/android_kernel_asus_sdm660 -b 4.4 kernel
 
 ClangPath=${MainClangZipPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
@@ -33,7 +33,7 @@ tar -xf gcc32.tar.gz -C $GCCbPath
 KERNEL_ROOTDIR=$(pwd)/kernel # IMPORTANT ! Fill with your kernel source root directory.
 export TZ=Asia/Jakarta # Change with your local timezone.
 export LD=ld.lld
-export KERNELNAME=TheOneMemory-Kernel-4-19-X00TD # Change with your localversion name or else.
+export KERNELNAME=TOM-EOL-CIP92 # Change with your localversion name or else.
 export KBUILD_BUILD_USER=queen # Change with your own name or else.
 IMAGE=$(pwd)/kernel/out/arch/arm64/boot/Image.gz-dtb
 CLANG_VER="$("$ClangPath"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
@@ -59,7 +59,7 @@ compile(){
 cd ${KERNEL_ROOTDIR}
 export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
-make -j$(nproc) O=out ARCH=arm64 asus/X00TD_defconfig
+make -j$(nproc) O=out ARCH=arm64 X00TD_defconfig
 make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
     LD_LIBRARY_PATH="${ClangPath}/lib64:${LD_LIBRARY_PATH}" \
     CC=${ClangPath}/bin/clang \
@@ -82,7 +82,7 @@ make -j$(nproc) ARCH=arm64 SUBARCH=arm64 O=out \
 	finerr
 	exit 1
    fi
-  git clone https://github.com/Tiktodz/AnyKernel3 -b 419 AnyKernel
+  git clone https://github.com/Tiktodz/AnyKernel3 -b 44 AnyKernel
 	cp $IMAGE AnyKernel
 }
 # Push kernel to channel
