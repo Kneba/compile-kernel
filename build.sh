@@ -19,8 +19,8 @@ ClangPath=${MainClangZipPath}
 [[ "$(pwd)" != "${MainPath}" ]] && cd "${MainPath}"
 mkdir $ClangPath
 rm -rf $ClangPath/*
-wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz -O "clang-r487747c.tar.gz"
-tar -xf clang-r487747c.tar.gz -C $ClangPath
+wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r498229b.tar.gz -O "clang-r498229b.tar.gz"
+tar -xf clang-r498229b.tar.gz -C $ClangPath
 
 mkdir $GCCaPath
 mkdir $GCCbPath
