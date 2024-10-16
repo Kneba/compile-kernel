@@ -108,7 +108,7 @@ function finerr() {
 # Zipping
 function zipping() {
     cd AnyKernel || exit 1
-    zip -r9 [KSU]$KERNELNAME-$DATE.zip *
+    zip -r9 $KERNELNAME-$DATE.zip *
     cd ..
 }
 compile
